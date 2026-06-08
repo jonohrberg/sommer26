@@ -1142,9 +1142,8 @@ function render() {
     if (todayOff>=0&&todayOff<nd)
       html+=`<div class="today-ln" style="left:${todayOff*dw+Math.floor(dw/2)}px"></div>`;
 
-    // Click zone when no trips
-    if (!myTrips.length)
-      html+=`<div class="add-zone" onclick="openAdd('${p.key}')"></div>`;
+    // Click zone (always visible so you can add more trips to a person)
+    html+=`<div class="add-zone" onclick="openAdd('${p.key}')"></div>`;
 
     // Trips
     for (const [tid,t] of myTrips) {
