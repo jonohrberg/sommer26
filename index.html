@@ -725,9 +725,9 @@ const STRINGS = {
     installDesc:    'Åpne som app — raskere og bedre!',
     installBtn:     'Legg til',
     installDismiss: 'Ikke nå',
-    iosInstallDesc: 'Trykk dele-ikonet (□↑) og velg «Legg til på hjem»',
+    iosInstallDesc: 'Åpne i Safari, trykk dele-ikonet (□↑) og velg «Legg til på hjem»',
     iosInstallBtn:  'Vis meg',
-    iosArrow:       'Trykk dele-ikonet nederst → «Legg til på hjem»',
+    iosArrow:       'Åpne i Safari → dele-ikonet → «Legg til på hjem»',
     errorTitle:     'Klarte ikke koble til',
     errorDesc:      'Sjekk at Vercel KV er koblet til prosjektet.',
     toastUpdated:   'Oppdatert ✓',
@@ -789,9 +789,9 @@ const STRINGS = {
     installDesc:    'Otvori kao app — brže i bolje!',
     installBtn:     'Dodaj',
     installDismiss: 'Ne sada',
-    iosInstallDesc: 'Pritisni ikonu dijeljenja (□↑) i odaberi «Dodaj na početni»',
+    iosInstallDesc: 'Otvori u Safariju, pritisni ikonu dijeljenja (□↑) i odaberi «Dodaj na početni»',
     iosInstallBtn:  'Pokaži mi',
-    iosArrow:       'Pritisni ikonu dijeljenja → «Dodaj na početni»',
+    iosArrow:       'Otvori u Safariju → ikona dijeljenja → «Dodaj na početni»',
     errorTitle:     'Nije moguće spojiti',
     errorDesc:      'Provjeri da je Vercel KV povezan s projektom.',
     toastUpdated:   'Ažurirano ✓',
@@ -1104,6 +1104,8 @@ function render() {
   html += `<div class="tl-head"><div class="tl-head-name"></div>
     <div class="tl-dates" style="width:${W}px">`;
   let lastMo = -1;
+  let lastTickLeft = -999;
+  const minTickGap = 18; // px — width of .day-n
   for (let i = 0; i < nd; i++) {
     const d = add(pd(dispStart), i);
     if (d.getMonth() !== lastMo) {
@@ -1113,7 +1115,10 @@ function render() {
     const dStr = ds(d);
     const isT = dStr === todayStr;
     const isW = d.getDay()===0||d.getDay()===6;
-    if (dw>=13||d.getDate()===1||d.getDate()%5===0||isT) {
+    const wantShow = dw>=13 || d.getDate()===1 || d.getDate()%5===0 || isT;
+    const tooClose = (i*dw - lastTickLeft) < minTickGap;
+    if (wantShow && (!tooClose || isT)) {
+      lastTickLeft = i*dw;
       html += `<div class="day-tick${isT?' today':''}${isW?' wknd':''}" style="left:${i*dw}px;width:${dw}px">
         <div class="day-n">${d.getDate()}</div></div>`;
     }
