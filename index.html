@@ -13,6 +13,7 @@
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    * { -webkit-tap-highlight-color: transparent; }
 
     :root {
       --bg:      #0d5fa8;
@@ -158,15 +159,16 @@
     /* ── HEADER ── */
     header {
       flex-shrink: 0; display: flex; align-items: center;
-      padding: 0 14px; gap: 10px;
-      background: linear-gradient(135deg, #071e30 0%, #0c2840 100%);
-      border-bottom: 1px solid rgba(0,180,200,0.2);
-      box-shadow: 0 1px 0 rgba(224,120,72,0.1);
-      height: 52px;
+      padding: 0 12px; gap: 6px;
+      background: rgba(0,0,0,0.30);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      height: 54px;
+      padding-top: env(safe-area-inset-top);
     }
-    .h-title { flex: 1; }
-    .h-title h1 { font-size: 1rem; font-weight: 700; }
-    .h-title p  { font-size: 0.74rem; color: var(--muted); }
+    .h-title { flex: 1; min-width: 0; }
+    .h-title h1 { font-size: 0.92rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .h-title p  { font-size: 0.68rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
     .sync-dot {
       width: 8px; height: 8px; border-radius: 50%;
@@ -177,12 +179,13 @@
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
     .icon-btn {
-      width: 34px; height: 34px; border-radius: 50%; border: none;
-      background: var(--card); color: var(--text); cursor: pointer;
+      width: 40px; height: 40px; border-radius: 50%; border: none;
+      background: rgba(255,255,255,0.12); color: var(--text); cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       font-size: 0.95rem; transition: background 0.15s;
+      flex-shrink: 0;
     }
-    .icon-btn:hover { background: var(--border); }
+    .icon-btn:hover { background: rgba(255,255,255,0.22); }
 
     /* ── LEGEND ── */
     .legend {
@@ -305,12 +308,13 @@
     .modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
 
     label { display: block; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
-    input, select {
+    input, select, textarea {
       background: var(--bg); border: 1px solid var(--border); color: var(--text);
-      padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; width: 100%;
+      padding: 10px 12px; border-radius: 8px; font-size: 16px; width: 100%;
       font-family: inherit; transition: border-color 0.2s;
     }
-    input:focus, select:focus { outline: none; border-color: var(--primary); }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+    textarea { resize: vertical; min-height: 60px; line-height: 1.4; }
 
     .form-row { display: flex; gap: 10px; }
     .form-row .fg { flex: 1; }
@@ -360,12 +364,14 @@
 
     /* ── FAB ── */
     .fab {
-      position: fixed; bottom: 22px; right: 20px;
-      width: 52px; height: 52px; border-radius: 50%;
-      background: var(--primary); color: #fff; border: none;
-      font-size: 1.4rem; cursor: pointer; z-index: 100;
+      position: fixed;
+      bottom: max(22px, calc(env(safe-area-inset-bottom) + 16px));
+      right: 20px;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--primary); color: #000; border: none;
+      font-size: 1.5rem; cursor: pointer; z-index: 100;
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 4px 18px rgba(99,102,241,0.55); transition: all .18s;
+      box-shadow: 0 4px 20px rgba(255,208,64,0.5); transition: all .18s;
     }
     .fab:hover { transform: scale(1.08); }
     .fab:active { transform: scale(0.93); }
@@ -380,6 +386,33 @@
       transition: all .22s; white-space: nowrap; pointer-events: none;
     }
     .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── LIST VIEW ── */
+    #list-view {
+      flex: 1; overflow-y: auto; padding: 10px 12px 80px;
+      display: flex; flex-direction: column; gap: 18px;
+    }
+    .lv-person { display: flex; flex-direction: column; gap: 6px; }
+    .lv-person-hd {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.82rem; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.06em;
+      padding: 0 4px;
+    }
+    .lv-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 11px 14px;
+      display: flex; flex-direction: column; gap: 4px;
+      cursor: pointer; transition: background .15s;
+    }
+    .lv-card:hover { background: var(--card); }
+    .lv-card-top {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.95rem; font-weight: 600;
+    }
+    .lv-card-dates { font-size: 0.78rem; color: var(--muted); }
+    .lv-card-notes { font-size: 0.78rem; color: var(--muted); font-style: italic; margin-top: 2px; }
+    .lv-empty { color: var(--muted); font-size: 0.85rem; padding: 6px 4px; }
 
     @media (min-width: 560px) {
       .overlay { align-items: center; }
@@ -488,6 +521,12 @@
     </div>
     <button id="btn-setup-start" class="btn btn-p" style="justify-content:center;margin-top:4px" onclick="saveSetup()">Start kalender →</button>
   </div>
+  <p style="margin-top:18px;font-size:0.8rem;color:var(--muted)">
+    Har du allerede en kalender?
+    <button onclick="openM('m-settings')" style="background:none;border:none;color:var(--primary);cursor:pointer;font-size:0.8rem;text-decoration:underline;padding:0">
+      ⚙️ Innstillinger
+    </button>
+  </p>
 </div>
 
 <!-- ERROR -->
@@ -506,6 +545,7 @@
       <p id="app-subtitle"></p>
     </div>
     <div class="sync-dot" id="sync-dot" title="Synkroniseringsstatus"></div>
+    <button class="icon-btn" id="view-btn" onclick="toggleView()" title="Bytt visning">📋</button>
     <button class="icon-btn" id="lang-btn" onclick="showLangScreen()" title="Bytt språk" style="font-size:0.75rem;font-weight:700;letter-spacing:0.02em">NO</button>
     <button class="icon-btn" onclick="openM('m-settings')">⚙️</button>
   </header>
@@ -515,6 +555,8 @@
   <div class="tl-wrap" id="tl-wrap">
     <div class="tl-inner" id="tl-inner"></div>
   </div>
+
+  <div id="list-view" class="hidden"></div>
 
   <button class="fab" onclick="openAdd()">+</button>
 </div>
@@ -547,6 +589,11 @@
         <button class="t-opt"    data-t="buss"  onclick="pickT(this)"><span class="i">🚌</span><span id="t-buss">Buss</span></button>
         <button class="t-opt"    data-t="annet" onclick="pickT(this)"><span class="i">📍</span><span id="t-annet">Annet</span></button>
       </div>
+    </div>
+    <div class="fg">
+      <label id="lbl-notes">Notater</label>
+      <textarea id="f-notes" rows="2" placeholder="Flynummer, hvem kjører, annen info…"
+        style="margin-top:5px;resize:vertical;min-height:54px"></textarea>
     </div>
     <div class="m-actions">
       <button id="btn-trip-cancel" class="btn btn-g" onclick="closeM('m-trip')">Avbryt</button>
@@ -595,6 +642,10 @@
     <div class="share-row">
       <input id="share-url" readonly>
       <button class="btn btn-g btn-sm" onclick="copyURL()">Kopier</button>
+    </div>
+    <div style="margin-top:12px;text-align:center">
+      <p style="font-size:0.75rem;color:var(--muted);margin-bottom:8px" id="lbl-qr">QR-kode for deling</p>
+      <img id="qr-img" src="" alt="QR" style="width:150px;height:150px;border-radius:10px;border:2px solid var(--border)">
     </div>
 
     <div class="m-actions">
@@ -686,6 +737,12 @@ const STRINGS = {
     errDateOrder:   'Sluttdato kan ikke være før startdato',
     errName:        'Skriv inn et turnavn',
     edit:           'Rediger',
+    notes:          'Notater',
+    notesPlaceholder: 'Flynummer, hvem kjører, annen info…',
+    listView:       'Liste',
+    timelineView:   'Tidslinje',
+    noTrips:        'Ingen reiser lagt til ennå',
+    qrCode:         'QR-kode for deling',
   },
   hr: {
     loading:        "Učitavam The Markovic's Planner…",
@@ -742,6 +799,12 @@ const STRINGS = {
     errDateOrder:   'Krajnji datum ne može biti prije početnog',
     errName:        'Unesite naziv putovanja',
     edit:           'Uredi',
+    notes:          'Bilješke',
+    notesPlaceholder: 'Broj leta, tko vozi, ostale informacije…',
+    listView:       'Popis',
+    timelineView:   'Vremenski prikaz',
+    noTrips:        'Još nema putovanja',
+    qrCode:         'QR kod za dijeljenje',
   }
 };
 
@@ -771,6 +834,8 @@ function applyLang() {
   document.getElementById('t-baat').textContent              = t('boat');
   document.getElementById('t-buss').textContent              = t('bus');
   document.getElementById('t-annet').textContent             = t('other');
+  document.getElementById('lbl-notes').textContent           = t('notes');
+  document.getElementById('f-notes').placeholder             = t('notesPlaceholder');
   document.getElementById('btn-trip-cancel').textContent     = t('cancel');
   document.getElementById('btn-trip-save').textContent       = t('save');
   document.getElementById('settings-title').textContent      = t('settingsTitle');
@@ -813,6 +878,7 @@ const TRANSPORT = {
 // ── STATE ────────────────────────────────
 let trips     = {};
 let editId    = null;
+let viewMode  = 'timeline'; // 'timeline' | 'list'
 let transport = 'fly';
 let popup     = null;
 let lastHash  = '';
@@ -848,7 +914,7 @@ async function fetchTrips() {
     if (!res.ok) throw new Error(res.status);
     const data = await res.json();
     const hash = JSON.stringify(data);
-    if (hash !== lastHash) { lastHash = hash; trips = data; render(); }
+    if (hash !== lastHash) { lastHash = hash; trips = data; render(); renderList(); }
     syncDot('ok');
   } catch(e) {
     syncDot('error');
@@ -954,7 +1020,8 @@ function startApp() {
 
 function buildUI() {
   // Oppdater tittel
-  document.getElementById('app-title').textContent = "🗓️ Kalenderplanlegging for The Markovics";
+  document.getElementById('app-title').textContent =
+    window.innerWidth < 400 ? "🗓️ The Markovics" : "🗓️ Kalenderplanlegging for The Markovics";
   document.getElementById('app-subtitle').textContent =
     fmtDate(cfg.start) + ' – ' + fmtDate(cfg.end);
 
@@ -1083,6 +1150,57 @@ function render() {
   }
 }
 
+function toggleView() {
+  viewMode = viewMode === 'timeline' ? 'list' : 'timeline';
+  const tl = document.getElementById('tl-wrap');
+  const lv = document.getElementById('list-view');
+  const btn = document.getElementById('view-btn');
+  if (viewMode === 'list') {
+    tl.classList.add('hidden');
+    lv.classList.remove('hidden');
+    btn.textContent = '📅';
+    btn.title = t('timelineView');
+    renderList();
+  } else {
+    lv.classList.add('hidden');
+    tl.classList.remove('hidden');
+    btn.textContent = '📋';
+    btn.title = t('listView');
+    render();
+  }
+}
+
+function renderList() {
+  const lv = document.getElementById('list-view');
+  if (!lv || viewMode !== 'list') return;
+  const fmtD = s => pd(s).toLocaleDateString(lang||'no', {day:'numeric', month:'short'});
+  let html = '';
+  for (const p of PEOPLE) {
+    const myTrips = Object.entries(trips)
+      .filter(([,tr]) => tr.person === p.key)
+      .sort((a,b) => a[1].fra.localeCompare(b[1].fra));
+    html += `<div class="lv-person">
+      <div class="lv-person-hd">
+        <span style="width:10px;height:10px;border-radius:50%;background:${p.color};display:inline-block"></span>
+        ${esc(p.name)}
+      </div>`;
+    if (!myTrips.length) {
+      html += `<div class="lv-empty">${t('noTrips')}</div>`;
+    } else {
+      for (const [tid, tr] of myTrips) {
+        const ico = (TRANSPORT[tr.transport]||TRANSPORT.annet).i;
+        html += `<div class="lv-card" onclick="editTrip('${tid}')">
+          <div class="lv-card-top">${ico} <span>${esc(tr.city)}</span></div>
+          <div class="lv-card-dates">📅 ${fmtD(tr.fra)} – ${fmtD(tr.til)}</div>
+          ${tr.notes ? `<div class="lv-card-notes">📝 ${esc(tr.notes)}</div>` : ''}
+        </div>`;
+      }
+    }
+    html += `</div>`;
+  }
+  lv.innerHTML = html;
+}
+
 function calcOverlaps(nd, dw) {
   const groups=[];
   for (let i=0;i<nd;i++) {
@@ -1119,14 +1237,21 @@ function showPopup(e,tid) {
     <h3>${ico} ${esc(t.city)}</h3>
     <div class="popup-meta" style="color:${p.color||'var(--muted)'}">● ${esc(p.name||'?')}</div>
     <div class="popup-meta">📅 ${fmtD(t.fra)} – ${fmtD(t.til)}</div>
+    ${t.notes?`<div class="popup-meta" style="color:var(--muted);font-style:italic">📝 ${esc(t.notes)}</div>`:''}
     <div class="popup-actions">
-      <button class="btn btn-g btn-sm" onclick="closePopup()">Lukk</button>
-      <button class="btn btn-p btn-sm" onclick="editTrip('${tid}');closePopup()">Rediger</button>
+      <button class="btn btn-g btn-sm" onclick="closePopup()">${lang==='hr'?'Zatvori':'Lukk'}</button>
+      <button class="btn btn-p btn-sm" onclick="editTrip('${tid}');closePopup()">${lang==='hr'?'Uredi':'Rediger'}</button>
     </div>`;
   document.body.appendChild(el); popup=el;
-  const x=Math.min(e.clientX,innerWidth-245);
-  const y=Math.min(e.clientY+8,innerHeight-160);
-  el.style.left=x+'px'; el.style.top=y+'px';
+  if (innerWidth < 500) {
+    // Mobil: sentrert nederst
+    el.style.left='50%'; el.style.transform='translateX(-50%)';
+    el.style.bottom='80px'; el.style.top='auto'; el.style.maxWidth='calc(100vw - 32px)';
+  } else {
+    const x=Math.min(e.clientX,innerWidth-245);
+    const y=Math.min(e.clientY+8,innerHeight-160);
+    el.style.left=x+'px'; el.style.top=y+'px';
+  }
   setTimeout(()=>document.addEventListener('click',closePopup,{once:true}),80);
 }
 function closePopup(){if(popup){popup.remove();popup=null;}}
@@ -1134,11 +1259,12 @@ function closePopup(){if(popup){popup.remove();popup=null;}}
 // ── TRIP CRUD ────────────────────────────
 function openAdd(personKey) {
   editId=null;
-  document.getElementById('trip-title').textContent='Legg til reise';
+  document.getElementById('trip-title').textContent=t('addTrip');
   document.getElementById('del-btn').classList.add('hidden');
   document.getElementById('f-city').value='';
-  const t=today();
-  const def = t>=cfg.start&&t<=cfg.end ? t : cfg.start;
+  document.getElementById('f-notes').value='';
+  const td=today();
+  const def = td>=cfg.start&&td<=cfg.end ? td : cfg.start;
   document.getElementById('f-fra').value=def;
   document.getElementById('f-til').value=def;
   document.getElementById('f-fra').min=cfg.start; document.getElementById('f-fra').max=cfg.end;
@@ -1148,15 +1274,18 @@ function openAdd(personKey) {
 }
 
 function editTrip(tid) {
-  const t=trips[tid]; if(!t) return;
+  const tr=trips[tid]; if(!tr) return;
   editId=tid;
-  document.getElementById('trip-title').textContent='Rediger reise';
+  document.getElementById('trip-title').textContent=t('editTrip');
   document.getElementById('del-btn').classList.remove('hidden');
-  document.getElementById('f-person').value=t.person;
-  document.getElementById('f-city').value=t.city;
-  document.getElementById('f-fra').value=t.fra;
-  document.getElementById('f-til').value=t.til;
-  setT(t.transport||'fly'); openM('m-trip');
+  document.getElementById('f-person').value=tr.person;
+  document.getElementById('f-city').value=tr.city;
+  document.getElementById('f-fra').value=tr.fra;
+  document.getElementById('f-til').value=tr.til;
+  document.getElementById('f-fra').min=cfg.start; document.getElementById('f-fra').max=cfg.end;
+  document.getElementById('f-til').min=cfg.start; document.getElementById('f-til').max=cfg.end;
+  document.getElementById('f-notes').value=tr.notes||'';
+  setT(tr.transport||'fly'); openM('m-trip');
 }
 
 async function saveTrip() {
@@ -1167,8 +1296,9 @@ async function saveTrip() {
   if(!city){toast(t('errCity'));return;}
   if(!fra||!til){toast(t('errDates'));return;}
   if(til<fra){toast(t('errDateOrder'));return;}
+  const notes=document.getElementById('f-notes').value.trim();
   const id=editId||uid();
-  const trip={person,city,fra,til,transport};
+  const trip={person,city,fra,til,transport,notes};
   trips[id]=trip; render(); // optimistisk
   closeM('m-trip');
   try { await apiSave(id,trip); toast(editId?t('toastUpdated'):t('toastAdded')); }
@@ -1277,7 +1407,15 @@ async function removePerson(key) {
 // ── MODALS ───────────────────────────────
 function openM(id){
   document.getElementById(id).classList.add('on');
-  if (id === 'm-settings') renderPeopleList();
+  if (id === 'm-settings') {
+    renderPeopleList();
+    document.getElementById('lbl-qr').textContent = t('qrCode');
+    const url = location.href;
+    document.getElementById('share-url').value = url;
+    document.getElementById('qr-img').src =
+      'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' +
+      encodeURIComponent(url) + '&bgcolor=0a4f8f&color=ffffff&margin=10';
+  }
 }
 function closeM(id){ document.getElementById(id).classList.remove('on'); }
 function bgClose(e){ if(e.target.classList.contains('overlay')) e.target.classList.remove('on'); }
