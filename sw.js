@@ -1,4 +1,4 @@
-const CACHE = 'sommer26-v2';
+const CACHE = 'sommer26-v3';
 const SHELL = ['/', '/index.html', '/manifest.json', '/icon.svg'];
 
 self.addEventListener('install', e => {

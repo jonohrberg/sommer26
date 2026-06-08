@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>The Markovic's Planner</title>
-  <meta name="theme-color" content="#120500">
+  <meta name="theme-color" content="#0a3d82">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Markovic's">
@@ -15,14 +15,14 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:      #120500;
-      --surface: #1e0d00;
-      --card:    #2b1500;
-      --border:  #4a2a08;
-      --text:    #fff4e6;
-      --muted:   #c4845a;
-      --primary: #ffb020;   /* Solgult */
-      --warm:    #ff5520;   /* Solnedgang rød */
+      --bg:      #0d5fa8;
+      --surface: #0a4f8f;
+      --card:    #0d5fa8;
+      --border:  rgba(255,255,255,0.22);
+      --text:    #ffffff;
+      --muted:   rgba(255,255,255,0.62);
+      --primary: #ffd040;   /* Solgult */
+      --warm:    #ff6a2e;   /* Korall */
       --r: 10px;
       --name-w: 108px;
       --row-h:  50px;
@@ -31,11 +31,11 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background:
-        radial-gradient(ellipse at 50% -15%, rgba(255,190,0,0.50)   0%, transparent 55%),
-        radial-gradient(ellipse at 85% 20%,  rgba(255,80,10,0.28)   0%, transparent 45%),
-        radial-gradient(ellipse at 10% 70%,  rgba(255,140,0,0.18)   0%, transparent 45%),
-        radial-gradient(ellipse at 60% 100%, rgba(0,160,180,0.10)   0%, transparent 40%),
-        linear-gradient(180deg, #120500 0%, #0a0200 100%);
+        radial-gradient(ellipse at 50% -8%,  rgba(255,235,80,1.00)  0%, rgba(255,160,0,0.70) 28%, transparent 55%),
+        radial-gradient(ellipse at 88% 8%,   rgba(255,110,30,0.55)  0%, transparent 40%),
+        radial-gradient(ellipse at 12% 15%,  rgba(255,200,60,0.35)  0%, transparent 38%),
+        radial-gradient(ellipse at 50% 100%, rgba(0,200,220,0.18)   0%, transparent 45%),
+        linear-gradient(175deg, #1e7ec4 0%, #1260a8 45%, #0a3d82 100%);
       color: var(--text);
       height: 100dvh; overflow: hidden;
       display: flex; flex-direction: column;
@@ -50,10 +50,10 @@
       align-items: center; justify-content: center;
       padding: 32px 24px; gap: 0;
       background:
-        radial-gradient(ellipse at 50% -15%, rgba(255,190,0,0.55)  0%, transparent 55%),
-        radial-gradient(ellipse at 85% 20%,  rgba(255,80,10,0.30)  0%, transparent 45%),
-        radial-gradient(ellipse at 10% 80%,  rgba(255,140,0,0.20)  0%, transparent 45%),
-        linear-gradient(180deg, #120500 0%, #0a0200 100%);
+        radial-gradient(ellipse at 50% -8%,  rgba(255,235,80,1.00)  0%, rgba(255,160,0,0.70) 28%, transparent 55%),
+        radial-gradient(ellipse at 88% 8%,   rgba(255,110,30,0.55)  0%, transparent 40%),
+        radial-gradient(ellipse at 12% 15%,  rgba(255,200,60,0.35)  0%, transparent 38%),
+        linear-gradient(175deg, #1e7ec4 0%, #1260a8 45%, #0a3d82 100%);
     }
     #lang-screen.hidden { display: none !important; }
 
@@ -70,20 +70,61 @@
       display: flex; gap: 16px;
     }
     .lang-card {
-      width: 140px; padding: 28px 20px;
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 18px; cursor: pointer;
-      display: flex; flex-direction: column; align-items: center; gap: 12px;
-      transition: all 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      width: 150px; padding: 24px 20px 20px;
+      background: rgba(255,255,255,0.15);
+      border: 1.5px solid rgba(255,255,255,0.35);
+      backdrop-filter: blur(12px);
+      border-radius: 20px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 14px;
+      transition: all 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.20);
       user-select: none;
     }
     .lang-card:hover {
-      border-color: var(--primary); background: var(--card);
-      transform: translateY(-4px); box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+      background: rgba(255,255,255,0.28);
+      border-color: rgba(255,255,255,0.6);
+      transform: translateY(-5px); box-shadow: 0 16px 44px rgba(0,0,0,0.25);
     }
     .lang-card:active { transform: translateY(-1px); }
-    .lang-flag { font-size: 3.2rem; line-height: 1; }
-    .lang-name { font-size: 0.92rem; font-weight: 700; color: var(--text); }
+
+    /* CSS flags */
+    .lang-flag { width: 80px; height: 54px; border-radius: 7px; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.3); position: relative; }
+
+    /* Norway: red + white+blue cross */
+    .flag-no { background: #EF2B2D; }
+    .flag-no::before {
+      content: ''; position: absolute; inset: 0;
+      background:
+        linear-gradient(transparent 37%, #fff 37%, #fff 63%, transparent 63%),
+        linear-gradient(90deg, transparent 27%, #fff 27%, #fff 37%, transparent 37%);
+    }
+    .flag-no::after {
+      content: ''; position: absolute; inset: 0;
+      background:
+        linear-gradient(transparent 42%, #002868 42%, #002868 58%, transparent 58%),
+        linear-gradient(90deg, transparent 31%, #002868 31%, #002868 33%, transparent 33%);
+    }
+
+    /* Croatia: red/white/blue tricolor */
+    .flag-hr {
+      background: linear-gradient(180deg,
+        #FF0000 0%, #FF0000 33.3%,
+        #FFFFFF 33.3%, #FFFFFF 66.6%,
+        #0033A0 66.6%, #0033A0 100%);
+    }
+    /* Checkered shield overlay */
+    .flag-hr::after {
+      content: '';
+      position: absolute;
+      left: 50%; top: 10%;
+      transform: translateX(-50%);
+      width: 28px; height: 22px;
+      background:
+        repeating-conic-gradient(#d32020 0% 25%, #fff 0% 50%) 0 0 / 7px 7px;
+      border: 1.5px solid rgba(0,0,0,0.35);
+      border-radius: 1px;
+    }
+
+    .lang-name { font-size: 1rem; font-weight: 700; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
 
     /* ── LOADING ── */
     #loading {
@@ -401,11 +442,11 @@
   <div class="lang-tagline">Velg språk / Odaberite jezik</div>
   <div class="lang-cards">
     <div class="lang-card" onclick="setLang('no')">
-      <div class="lang-flag">🇳🇴</div>
+      <div class="lang-flag flag-no"></div>
       <div class="lang-name">Norsk</div>
     </div>
     <div class="lang-card" onclick="setLang('hr')">
-      <div class="lang-flag">🇭🇷</div>
+      <div class="lang-flag flag-hr"></div>
       <div class="lang-name">Hrvatski</div>
     </div>
   </div>
@@ -422,9 +463,9 @@
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   height:100dvh; padding:24px;
   background:
-    radial-gradient(ellipse at 50% -15%, rgba(255,190,0,0.50)  0%, transparent 55%),
-    radial-gradient(ellipse at 85% 25%,  rgba(255,80,10,0.25)  0%, transparent 45%),
-    linear-gradient(180deg, #120500 0%, #0a0200 100%);
+    radial-gradient(ellipse at 50% -8%,  rgba(255,235,80,1.00)  0%, rgba(255,160,0,0.70) 28%, transparent 55%),
+    radial-gradient(ellipse at 88% 8%,   rgba(255,110,30,0.55)  0%, transparent 40%),
+    linear-gradient(175deg, #1e7ec4 0%, #1260a8 45%, #0a3d82 100%);
 ">
   <div style="font-size:3rem;margin-bottom:10px">✈️</div>
   <h1 id="setup-title" style="font-size:1.4rem;margin-bottom:6px">Ny reisekalender</h1>
@@ -465,7 +506,7 @@
       <p id="app-subtitle"></p>
     </div>
     <div class="sync-dot" id="sync-dot" title="Synkroniseringsstatus"></div>
-    <button class="icon-btn" id="lang-btn" onclick="showLangScreen()" title="Bytt språk">🇳🇴</button>
+    <button class="icon-btn" id="lang-btn" onclick="showLangScreen()" title="Bytt språk" style="font-size:0.75rem;font-weight:700;letter-spacing:0.02em">NO</button>
     <button class="icon-btn" onclick="openM('m-settings')">⚙️</button>
   </header>
 
@@ -746,7 +787,7 @@ function applyLang() {
   document.getElementById('error-base-msg').textContent      = t('errorDesc');
   document.querySelector('html').lang = lang;
   const lb = document.getElementById('lang-btn');
-  if (lb) lb.textContent = lang === 'hr' ? '🇭🇷' : '🇳🇴';
+  if (lb) lb.textContent = lang === 'hr' ? 'HR' : 'NO';
 }
 
 function showLangScreen() {
@@ -1299,12 +1340,7 @@ if (isIOS && !isInstalled) {
 }
 
 // ── START ────────────────────────────────
-if (lang) {
-  document.getElementById('lang-screen').classList.add('hidden');
-  applyLang();
-  init();
-}
-// else: lang-screen is visible by default; setLang() will call init()
+// Lang-screen vises alltid først — setLang() starter appen
 </script>
 </body>
 </html>
