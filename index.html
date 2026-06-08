@@ -3,24 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>☀️ Sommer 2026</title>
-  <meta name="theme-color" content="#4f46e5">
+  <title>The Markovic's Planner</title>
+  <meta name="theme-color" content="#0d0d1a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Sommer 26">
-  <link rel="manifest" id="manifest-link">
+  <meta name="apple-mobile-web-app-title" content="Markovic's">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/icon.svg">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:      #0d0d1a;
-      --surface: #16162a;
-      --card:    #1e1e38;
-      --border:  #2a2a4a;
-      --text:    #e2e8f0;
-      --muted:   #7c87a0;
-      --primary: #6366f1;
+      --bg:      #03111e;
+      --surface: #071e30;
+      --card:    #0c2840;
+      --border:  #153d5a;
+      --text:    #eef6fb;
+      --muted:   #5f9ab8;
+      --primary: #00b4c8;   /* Adriatisk turkis */
+      --warm:    #e07848;   /* Terrakotta/solnedgang */
       --r: 10px;
       --name-w: 108px;
       --row-h:  50px;
@@ -28,7 +30,12 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg); color: var(--text);
+      background:
+        radial-gradient(ellipse at 50% -5%,  rgba(224,120,72,0.22)  0%, transparent 50%),
+        radial-gradient(ellipse at 15% 60%,  rgba(0,180,200,0.10)   0%, transparent 45%),
+        radial-gradient(ellipse at 85% 100%, rgba(0,100,160,0.18)   0%, transparent 50%),
+        linear-gradient(180deg, #03111e 0%, #020c17 100%);
+      color: var(--text);
       height: 100dvh; overflow: hidden;
       display: flex; flex-direction: column;
     }
@@ -68,7 +75,9 @@
     header {
       flex-shrink: 0; display: flex; align-items: center;
       padding: 0 14px; gap: 10px;
-      background: var(--surface); border-bottom: 1px solid var(--border);
+      background: linear-gradient(135deg, #071e30 0%, #0c2840 100%);
+      border-bottom: 1px solid rgba(0,180,200,0.2);
+      box-shadow: 0 1px 0 rgba(224,120,72,0.1);
       height: 52px;
     }
     .h-title { flex: 1; }
@@ -181,15 +190,15 @@
       position: sticky; left: 0; z-index: 5;
       background: var(--bg); border-right: 1px solid var(--border);
       display: flex; align-items: center; padding: 0 10px;
-      font-size: 0.65rem; font-weight: 700; color: #a5b4fc;
+      font-size: 0.65rem; font-weight: 700; color: #00c8d8;
       text-transform: uppercase; letter-spacing: 0.06em;
     }
     .tl-ov-area { position: relative; flex-shrink: 0; }
     .ov-blk {
       position: absolute; top: 4px; height: 20px; border-radius: 4px;
-      background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.45);
+      background: rgba(0,180,200,0.15); border: 1px solid rgba(0,180,200,0.4);
       display: flex; align-items: center; padding: 0 5px;
-      font-size: 0.63rem; color: #a5b4fc; font-weight: 700;
+      font-size: 0.63rem; color: #00c8d8; font-weight: 700;
       cursor: default; white-space: nowrap; overflow: hidden;
     }
 
@@ -293,6 +302,51 @@
       .modal { border-radius: 14px; margin: 16px; max-height: 86dvh; }
       .t-grid { grid-template-columns: repeat(6, 1fr); }
     }
+
+    /* ── INSTALL BANNER ── */
+    #install-banner {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 500;
+      padding: 14px 18px max(14px, env(safe-area-inset-bottom)) 18px;
+      background: linear-gradient(135deg, #071e30, #0c2840);
+      border-top: 1px solid rgba(0,180,200,0.2);
+      display: flex; align-items: center; gap: 14px;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.5);
+      transform: translateY(100%);
+      transition: transform 0.35s cubic-bezier(.32,.72,0,1);
+    }
+    #install-banner.show { transform: translateY(0); }
+    #install-banner.hidden { display: none; }
+
+    .install-icon {
+      width: 46px; height: 46px; border-radius: 11px;
+      background: #f59e0b; display: flex; align-items: center;
+      justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+    }
+    .install-text { flex: 1; }
+    .install-text strong { display: block; font-size: 0.9rem; margin-bottom: 2px; }
+    .install-text span { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+    .install-actions { display: flex; flex-direction: column; gap: 6px; align-items: flex-end; flex-shrink: 0; }
+
+    /* iOS arrow pointing to share button */
+    #ios-arrow {
+      position: fixed; bottom: max(72px, calc(72px + env(safe-area-inset-bottom)));
+      left: 50%; transform: translateX(-50%);
+      z-index: 501; pointer-events: none;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      opacity: 0; transition: opacity 0.3s;
+    }
+    #ios-arrow.show { opacity: 1; }
+    #ios-arrow .arrow-label {
+      background: var(--primary); color: #fff;
+      padding: 6px 14px; border-radius: 20px;
+      font-size: 0.8rem; font-weight: 600; white-space: nowrap;
+    }
+    #ios-arrow .arrow-down {
+      width: 0; height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 10px solid var(--primary);
+    }
   </style>
 </head>
 <body>
@@ -300,7 +354,39 @@
 <!-- LOADING -->
 <div id="loading">
   <div class="spin"></div>
-  <span>Laster reisekalender…</span>
+  <span>Laster The Markovic's Planner…</span>
+</div>
+
+<!-- SETUP (første gang) -->
+<div id="setup-screen" class="hidden" style="
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  height:100dvh; padding:24px;
+  background:
+    radial-gradient(ellipse at 50% -5%,  rgba(224,120,72,0.25) 0%, transparent 55%),
+    radial-gradient(ellipse at 15% 60%,  rgba(0,180,200,0.12) 0%, transparent 45%),
+    linear-gradient(180deg, #03111e 0%, #020c17 100%);
+">
+  <div style="font-size:3rem;margin-bottom:10px">✈️</div>
+  <h1 style="font-size:1.4rem;margin-bottom:6px">Ny reisekalender</h1>
+  <p style="color:var(--muted);font-size:0.85rem;margin-bottom:28px;text-align:center">Sett opp turen, del lenken med vennene dine</p>
+
+  <div style="width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5)">
+    <div>
+      <label>Turnavn</label>
+      <input id="cfg-name" type="text" placeholder="Sommerferie 2026" style="margin-top:5px">
+    </div>
+    <div style="display:flex;gap:10px">
+      <div style="flex:1">
+        <label>Fra dato</label>
+        <input id="cfg-start" type="date" style="margin-top:5px">
+      </div>
+      <div style="flex:1">
+        <label>Til dato</label>
+        <input id="cfg-end" type="date" style="margin-top:5px">
+      </div>
+    </div>
+    <button class="btn btn-p" style="justify-content:center;margin-top:4px" onclick="saveSetup()">Start kalender →</button>
+  </div>
 </div>
 
 <!-- ERROR -->
@@ -314,8 +400,8 @@
 <div id="app">
   <header>
     <div class="h-title">
-      <h1>☀️ Sommer 2026</h1>
-      <p>12. juni – 20. juli</p>
+      <h1 id="app-title">☀️</h1>
+      <p id="app-subtitle"></p>
     </div>
     <div class="sync-dot" id="sync-dot" title="Synkroniseringsstatus"></div>
     <button class="icon-btn" onclick="openM('m-settings')">⚙️</button>
@@ -345,8 +431,8 @@
       <input id="f-city" type="text" placeholder="Oslo, Split, Dubrovnik…">
     </div>
     <div class="form-row" style="margin-top:12px">
-      <div class="fg"><label>Fra</label><input id="f-fra" type="date" min="2026-06-12" max="2026-07-20"></div>
-      <div class="fg"><label>Til</label><input id="f-til" type="date" min="2026-06-12" max="2026-07-20"></div>
+      <div class="fg"><label>Fra</label><input id="f-fra" type="date"></div>
+      <div class="fg"><label>Til</label><input id="f-til" type="date"></div>
     </div>
     <div class="fg">
       <label>Transport dit</label>
@@ -372,17 +458,34 @@
   <div class="modal">
     <div class="handle"></div>
     <div class="modal-title">⚙️ Innstillinger</div>
-    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">
-      Del denne URL-en med venner – da er alle koblet til samme kalender.
-    </p>
+
+    <div>
+      <label>Turnavn</label>
+      <input id="s-name" type="text" placeholder="Sommerferie 2026" style="margin-top:5px">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <div style="flex:1">
+        <label>Fra dato</label>
+        <input id="s-start" type="date" style="margin-top:5px">
+      </div>
+      <div style="flex:1">
+        <label>Til dato</label>
+        <input id="s-end" type="date" style="margin-top:5px">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <label>Del kalender</label>
+    <p style="font-size:0.8rem;color:var(--muted);margin:4px 0 8px">Del denne URL-en med vennene dine.</p>
     <div class="share-row">
       <input id="share-url" readonly>
       <button class="btn btn-g btn-sm" onclick="copyURL()">Kopier</button>
     </div>
-    <div class="divider"></div>
-    <p style="font-size:0.78rem;color:var(--muted)">Data synkroniseres via Vercel KV hvert 3. sekund.</p>
+
     <div class="m-actions">
-      <button class="btn btn-p" style="width:100%;justify-content:center" onclick="closeM('m-settings')">Lukk</button>
+      <button class="btn btn-g" onclick="closeM('m-settings')">Avbryt</button>
+      <button class="btn btn-p" onclick="saveSettings()">Lagre</button>
     </div>
   </div>
 </div>
@@ -390,19 +493,34 @@
 <!-- POPUP (dynamisk) -->
 <div class="toast" id="toast"></div>
 
+<!-- INSTALL BANNER -->
+<div id="install-banner" class="hidden">
+  <div class="install-icon">☀️</div>
+  <div class="install-text">
+    <strong id="install-title">Legg til på hjemmeskjerm</strong>
+    <span id="install-desc">Åpne som app — raskere og bedre!</span>
+  </div>
+  <div class="install-actions">
+    <button class="btn btn-p btn-sm" id="install-btn">Legg til</button>
+    <button class="btn btn-g btn-sm" onclick="dismissInstall()">Ikke nå</button>
+  </div>
+</div>
+
+<!-- iOS: pil som peker ned mot Share-knappen -->
+<div id="ios-arrow">
+  <div class="arrow-label">Trykk dele-ikonet nedst → «Legg til på hjem»</div>
+  <div class="arrow-down"></div>
+</div>
+
 <script>
-// ── KONFIG ──────────────────────────────
-const TRIP_START = '2026-06-12';
-const TRIP_END   = '2026-07-20';
+// ── KONFIG (lastes fra DB) ───────────────
+let cfg = { name: '', start: '', end: '' };
 
 const PEOPLE = [
-  { key: 'sanka',   name: 'Sanka',   color: '#6366f1' },
-  { key: 'ivo',     name: 'Ivo',     color: '#10b981' },
-  { key: 'sandra',  name: 'Sandra',  color: '#ec4899' },
-  { key: 'goran',   name: 'Goran',   color: '#f59e0b' },
-  { key: 'jon',     name: 'Jon',     color: '#3b82f6' },
-  { key: 'teo',     name: 'TEO',     color: '#a78bfa' },
-  { key: 'fredrik', name: 'Fredrik', color: '#f97316' },
+  { key: 'sanka',  name: 'Sanka',  color: '#6366f1' },
+  { key: 'ivo',    name: 'Ivo',    color: '#10b981' },
+  { key: 'sandra', name: 'Sandra', color: '#ec4899' },
+  { key: 'goran',  name: 'Goran',  color: '#f59e0b' },
 ];
 
 const TRANSPORT = {
@@ -478,11 +596,26 @@ async function apiDelete(id) {
 // ── START ────────────────────────────────
 async function init() {
   try {
-    await fetchTrips();
+    // Last innstillinger og turer parallelt
+    const [settings] = await Promise.all([
+      fetch('/api/settings').then(r => r.json()),
+      fetchTrips(),
+    ]);
+
     document.getElementById('loading').classList.add('hidden');
-    document.getElementById('app').classList.add('show');
-    buildUI();
+
+    if (!settings || !settings.start) {
+      // Første gang — vis oppsettskjerm
+      const ss = document.getElementById('setup-screen');
+      ss.classList.remove('hidden');
+      ss.style.display = 'flex';
+      return;
+    }
+
+    cfg = settings;
+    startApp();
     pollTimer = setInterval(fetchTrips, 3000);
+
   } catch(e) {
     document.getElementById('loading').classList.add('hidden');
     document.getElementById('error-screen').classList.add('show');
@@ -490,7 +623,38 @@ async function init() {
   }
 }
 
+async function saveSetup() {
+  const name  = document.getElementById('cfg-name').value.trim();
+  const start = document.getElementById('cfg-start').value;
+  const end   = document.getElementById('cfg-end').value;
+  if (!name)         { toast('Skriv inn et turnavn'); return; }
+  if (!start || !end){ toast('Velg datoer'); return; }
+  if (end < start)   { toast('Sluttdato kan ikke være før startdato'); return; }
+
+  await fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, start, end }),
+  });
+
+  cfg = { name, start, end };
+  document.getElementById('setup-screen').style.display = 'none';
+  startApp();
+  pollTimer = setInterval(fetchTrips, 3000);
+}
+
+function startApp() {
+  document.getElementById('app').classList.add('show');
+  buildUI();
+  render();
+}
+
 function buildUI() {
+  // Oppdater tittel
+  document.getElementById('app-title').textContent = '✈️ ' + cfg.name;
+  document.getElementById('app-subtitle').textContent =
+    fmtDate(cfg.start) + ' – ' + fmtDate(cfg.end);
+
   // Legend
   const leg = document.getElementById('legend');
   leg.innerHTML = PEOPLE.map(p =>
@@ -502,8 +666,18 @@ function buildUI() {
   document.getElementById('f-person').innerHTML =
     PEOPLE.map(p => `<option value="${p.key}">${p.name}</option>`).join('');
 
+  // Innstillingsskjema
+  document.getElementById('s-name').value  = cfg.name;
+  document.getElementById('s-start').value = cfg.start;
+  document.getElementById('s-end').value   = cfg.end;
+
   // Share URL
   document.getElementById('share-url').value = location.href;
+}
+
+function fmtDate(s) {
+  if (!s) return '';
+  return pd(s).toLocaleDateString('no', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 // ── RENDER ───────────────────────────────
@@ -511,7 +685,7 @@ function render() {
   const wrap = document.getElementById('tl-wrap');
   const nameW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--name-w')) || 108;
   const avail = wrap.clientWidth - nameW;
-  const nd = gap(TRIP_START, TRIP_END) + 1;  // 39 days
+  const nd = gap(cfg.start, cfg.end) + 1;  // 39 days
   const dw = Math.max(10, Math.floor(avail / nd));
   const W  = nd * dw;
   const todayStr = today();
@@ -522,7 +696,7 @@ function render() {
     <div class="tl-dates" style="width:${W}px">`;
   let lastMo = -1;
   for (let i = 0; i < nd; i++) {
-    const d = add(pd(TRIP_START), i);
+    const d = add(pd(cfg.start), i);
     if (d.getMonth() !== lastMo) {
       lastMo = d.getMonth();
       html += `<div class="mo-lbl" style="left:${i*dw}px">${d.toLocaleDateString('no',{month:'short'})}</div>`;
@@ -537,7 +711,7 @@ function render() {
   }
   html += `</div></div>`;
 
-  const todayOff = gap(TRIP_START, todayStr);
+  const todayOff = gap(cfg.start, todayStr);
 
   // Person rows
   for (const p of PEOPLE) {
@@ -554,7 +728,7 @@ function render() {
 
     // Weekend shading
     for (let i=0;i<nd;i++) {
-      const d=add(pd(TRIP_START),i);
+      const d=add(pd(cfg.start),i);
       if(d.getDay()===0||d.getDay()===6)
         html+=`<div class="wknd-bg" style="left:${i*dw}px;width:${dw}px"></div>`;
     }
@@ -569,7 +743,7 @@ function render() {
 
     // Trips
     for (const [tid,t] of myTrips) {
-      const s=gap(TRIP_START,t.fra), e=gap(TRIP_START,t.til);
+      const s=gap(cfg.start,t.fra), e=gap(cfg.start,t.til);
       const vs=Math.max(0,s), ve=Math.min(nd-1,e);
       if(ve<0||vs>=nd) continue;
       const left=(vs*dw), width=((ve-vs+1)*dw)-2;
@@ -609,7 +783,7 @@ function render() {
 function calcOverlaps(nd, dw) {
   const groups=[];
   for (let i=0;i<nd;i++) {
-    const dStr=ds(add(pd(TRIP_START),i));
+    const dStr=ds(add(pd(cfg.start),i));
     const byCity={};
     for (const [,t] of Object.entries(trips)) {
       if(t.fra<=dStr&&t.til>=dStr) {
@@ -661,8 +835,11 @@ function openAdd(personKey) {
   document.getElementById('del-btn').classList.add('hidden');
   document.getElementById('f-city').value='';
   const t=today();
-  document.getElementById('f-fra').value=t>=TRIP_START&&t<=TRIP_END?t:TRIP_START;
-  document.getElementById('f-til').value=t>=TRIP_START&&t<=TRIP_END?t:TRIP_START;
+  const def = t>=cfg.start&&t<=cfg.end ? t : cfg.start;
+  document.getElementById('f-fra').value=def;
+  document.getElementById('f-til').value=def;
+  document.getElementById('f-fra').min=cfg.start; document.getElementById('f-fra').max=cfg.end;
+  document.getElementById('f-til').min=cfg.start; document.getElementById('f-til').max=cfg.end;
   if(personKey) document.getElementById('f-person').value=personKey;
   setT('fly'); openM('m-trip');
 }
@@ -714,6 +891,27 @@ function setT(key){
 }
 
 // ── SETTINGS ────────────────────────────
+async function saveSettings() {
+  const name  = document.getElementById('s-name').value.trim();
+  const start = document.getElementById('s-start').value;
+  const end   = document.getElementById('s-end').value;
+  if (!name)         { toast('Skriv inn et turnavn'); return; }
+  if (!start || !end){ toast('Velg datoer'); return; }
+  if (end < start)   { toast('Sluttdato kan ikke være før startdato'); return; }
+
+  await fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, start, end }),
+  });
+
+  cfg = { name, start, end };
+  buildUI();
+  render();
+  closeM('m-settings');
+  toast('Innstillinger lagret ✓');
+}
+
 function copyURL(){
   navigator.clipboard.writeText(location.href)
     .then(()=>toast('URL kopiert! 🔗'))
@@ -734,15 +932,55 @@ document.addEventListener('keydown', e=>{
   }
 });
 
-// ── PWA ──────────────────────────────────
-const mf={name:'Sommer 2026',short_name:'Sommer26',start_url:'/',display:'standalone',
-  background_color:'#0d0d1a',theme_color:'#6366f1',
-  icons:[{src:`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>`,sizes:'512x512',type:'image/svg+xml'}]};
-document.getElementById('manifest-link').href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));
+// ── PWA & INSTALL ────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
+}
 
-if('serviceWorker' in navigator){
-  const sw=`self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(clients.claim()));`;
-  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+const isIOS       = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+const isInstalled = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+let deferredPrompt = null;
+
+function dismissInstall() {
+  document.getElementById('install-banner').classList.remove('show');
+  document.getElementById('ios-arrow').classList.remove('show');
+  setTimeout(() => document.getElementById('install-banner').classList.add('hidden'), 400);
+  localStorage.setItem('install-dismissed', '1');
+}
+
+function showBanner() {
+  if (isInstalled) return;
+  if (localStorage.getItem('install-dismissed')) return;
+  const banner = document.getElementById('install-banner');
+  banner.classList.remove('hidden');
+  requestAnimationFrame(() => setTimeout(() => banner.classList.add('show'), 50));
+}
+
+// Android / Chrome: bruk den innebygde install-prompten
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  showBanner();
+  document.getElementById('install-btn').onclick = async () => {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') dismissInstall();
+    deferredPrompt = null;
+  };
+});
+
+// iOS: vis manuell veiledning
+if (isIOS && !isInstalled) {
+  setTimeout(() => {
+    showBanner();
+    document.getElementById('install-title').textContent = 'Legg til på hjemmeskjerm';
+    document.getElementById('install-desc').textContent  = 'Trykk dele-ikonet (□↑) nederst og velg «Legg til på hjem»';
+    document.getElementById('install-btn').textContent   = 'Vis meg';
+    document.getElementById('install-btn').onclick = () => {
+      document.getElementById('ios-arrow').classList.add('show');
+      setTimeout(() => document.getElementById('ios-arrow').classList.remove('show'), 4000);
+    };
+  }, 2500);
 }
 
 // ── START ────────────────────────────────
