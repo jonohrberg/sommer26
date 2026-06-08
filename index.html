@@ -90,42 +90,49 @@
     /* CSS flags */
     .lang-flag { width: 80px; height: 54px; border-radius: 7px; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.3); position: relative; }
 
-    /* Norway: red + white+blue cross */
+    /* Norway: skandinavisk kors — vertikalt senter ved 36% fra venstre */
     .flag-no { background: #EF2B2D; }
     .flag-no::before {
       content: ''; position: absolute; inset: 0;
       background:
-        linear-gradient(transparent 37%, #fff 37%, #fff 63%, transparent 63%),
-        linear-gradient(90deg, transparent 27%, #fff 27%, #fff 37%, transparent 37%);
+        linear-gradient(transparent 37.5%, #fff 37.5%, #fff 62.5%, transparent 62.5%),
+        linear-gradient(90deg, transparent 27%, #fff 27%, #fff 45%, transparent 45%);
     }
     .flag-no::after {
       content: ''; position: absolute; inset: 0;
       background:
-        linear-gradient(transparent 42%, #002868 42%, #002868 58%, transparent 58%),
-        linear-gradient(90deg, transparent 31%, #002868 31%, #002868 33%, transparent 33%);
+        linear-gradient(transparent 43.5%, #002868 43.5%, #002868 56.5%, transparent 56.5%),
+        linear-gradient(90deg, transparent 31%, #002868 31%, #002868 41%, transparent 41%);
     }
 
-    /* Croatia: red/white/blue tricolor */
+    /* Croatia: rød/hvit/blå + šahovnica (rutet skjold) sentrert */
     .flag-hr {
       background: linear-gradient(180deg,
-        #FF0000 0%, #FF0000 33.3%,
-        #FFFFFF 33.3%, #FFFFFF 66.6%,
-        #0033A0 66.6%, #0033A0 100%);
+        #FF0000 0 33.3%, #FFFFFF 0 66.6%, #0033A0 0 100%);
+      position: relative;
     }
-    /* Checkered shield overlay */
-    .flag-hr::after {
+    .flag-hr::before {
       content: '';
       position: absolute;
-      left: 50%; top: 10%;
-      transform: translateX(-50%);
-      width: 28px; height: 22px;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -52%);
+      width: 30px; height: 24px;
       background:
-        repeating-conic-gradient(#d32020 0% 25%, #fff 0% 50%) 0 0 / 7px 7px;
-      border: 1.5px solid rgba(0,0,0,0.35);
-      border-radius: 1px;
+        repeating-conic-gradient(#CC0000 0% 25%, #FFFFFF 0% 50%) 0 0 / 6px 6px;
+      border: 1.5px solid rgba(0,0,0,0.4);
+      border-radius: 0 0 3px 3px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
 
     .lang-name { font-size: 1rem; font-weight: 700; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.4); }
+
+    /* Japan: hvit med rød sirkel */
+    .flag-jp { background: #FFFFFF; }
+    .flag-jp::after {
+      content: ''; position: absolute;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      width: 30px; height: 30px; border-radius: 50%; background: #BC002D;
+    }
 
     /* ── LOADING ── */
     #loading {
@@ -481,6 +488,10 @@
     <div class="lang-card" onclick="setLang('hr')">
       <div class="lang-flag flag-hr"></div>
       <div class="lang-name">Hrvatski</div>
+    </div>
+    <div class="lang-card" onclick="jokeJapanese()">
+      <div class="lang-flag flag-jp"></div>
+      <div class="lang-name">日本語</div>
     </div>
   </div>
 </div>
@@ -857,6 +868,14 @@ function applyLang() {
 
 function showLangScreen() {
   document.getElementById('lang-screen').classList.remove('hidden');
+}
+
+function jokeJapanese() {
+  // Meldingen vises alltid på kroatisk, uansett valgt språk
+  const el = document.getElementById('toast');
+  el.textContent = 'Stvarno misliš da sam imao volje prevesti ovu aplikaciju na japanski za tebe, klaune? 🤡';
+  el.classList.add('on');
+  setTimeout(() => el.classList.remove('on'), 4500);
 }
 
 // ── KONFIG (lastes fra DB) ───────────────
