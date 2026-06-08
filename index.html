@@ -876,11 +876,7 @@ function showLangScreen() {
 }
 
 function jokeJapanese() {
-  // Meldingen vises alltid på kroatisk, uansett valgt språk
-  const el = document.getElementById('toast');
-  el.textContent = 'Stvarno misliš da sam imao volje prevesti ovu aplikaciju na japanski za tebe, klaune? 🤡';
-  el.classList.add('on');
-  setTimeout(() => el.classList.remove('on'), 4500);
+  showToast('Stvarno misliš da sam imao volje prevesti ovu aplikaciju na japanski za tebe, klaune? 🤡', 4500);
 }
 
 // ── KONFIG (lastes fra DB) ───────────────
@@ -918,11 +914,15 @@ const uid   = () => Date.now().toString(36)+Math.random().toString(36).slice(2,5
 const esc   = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
 // ── TOAST ────────────────────────────────
-function toast(msg) {
+let _toastTimer = null;
+function showToast(msg, dur=2600) {
   const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('on');
-  setTimeout(() => el.classList.remove('on'), 2600);
+  clearTimeout(_toastTimer);
+  el.textContent = msg;
+  el.classList.add('on');
+  _toastTimer = setTimeout(() => el.classList.remove('on'), dur);
 }
+function toast(msg) { showToast(msg, 2600); }
 
 // ── SYNC STATUS ──────────────────────────
 function syncDot(state) {
