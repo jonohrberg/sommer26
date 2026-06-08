@@ -390,7 +390,8 @@
       background: var(--card); border: 1px solid var(--border);
       color: var(--text); padding: 8px 18px; border-radius: 20px;
       font-size: 0.83rem; z-index: 1100; opacity: 0;
-      transition: all .22s; white-space: nowrap; pointer-events: none;
+      transition: all .22s; pointer-events: none;
+      max-width: min(88vw, 380px); text-align: center; white-space: normal;
     }
     .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -1078,7 +1079,15 @@ function render() {
   const wrap = document.getElementById('tl-wrap');
   const nameW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--name-w')) || 108;
   const avail = wrap.clientWidth - nameW;
-  const nd = gap(cfg.start, cfg.end) + 1;  // 39 days
+
+  // Auto-extend display range to include all saved trips
+  let dispStart = cfg.start, dispEnd = cfg.end;
+  for (const tr of Object.values(trips)) {
+    if (tr.fra < dispStart) dispStart = tr.fra;
+    if (tr.til > dispEnd)   dispEnd   = tr.til;
+  }
+
+  const nd = gap(dispStart, dispEnd) + 1;
   const dw = Math.max(10, Math.floor(avail / nd));
   const W  = nd * dw;
   const todayStr = today();
@@ -1089,7 +1098,7 @@ function render() {
     <div class="tl-dates" style="width:${W}px">`;
   let lastMo = -1;
   for (let i = 0; i < nd; i++) {
-    const d = add(pd(cfg.start), i);
+    const d = add(pd(dispStart), i);
     if (d.getMonth() !== lastMo) {
       lastMo = d.getMonth();
       html += `<div class="mo-lbl" style="left:${i*dw}px">${d.toLocaleDateString(lang||'no',{month:'short'})}</div>`;
@@ -1104,7 +1113,7 @@ function render() {
   }
   html += `</div></div>`;
 
-  const todayOff = gap(cfg.start, todayStr);
+  const todayOff = gap(dispStart, todayStr);
 
   // Person rows
   for (const p of PEOPLE) {
@@ -1121,7 +1130,7 @@ function render() {
 
     // Weekend shading
     for (let i=0;i<nd;i++) {
-      const d=add(pd(cfg.start),i);
+      const d=add(pd(dispStart),i);
       if(d.getDay()===0||d.getDay()===6)
         html+=`<div class="wknd-bg" style="left:${i*dw}px;width:${dw}px"></div>`;
     }
@@ -1136,7 +1145,7 @@ function render() {
 
     // Trips
     for (const [tid,t] of myTrips) {
-      const s=gap(cfg.start,t.fra), e=gap(cfg.start,t.til);
+      const s=gap(dispStart,t.fra), e=gap(dispStart,t.til);
       const vs=Math.max(0,s), ve=Math.min(nd-1,e);
       if(ve<0||vs>=nd) continue;
       const left=(vs*dw), width=((ve-vs+1)*dw)-2;
@@ -1150,7 +1159,7 @@ function render() {
   }
 
   // Overlap row
-  const ovs = calcOverlaps(nd, dw);
+  const ovs = calcOverlaps(nd, dw, dispStart);
   if (ovs.length) {
     html+=`<div class="tl-ov-row">
       <div class="tl-ov-name">${t('overlap')}</div>
@@ -1224,10 +1233,10 @@ function renderList() {
   lv.innerHTML = html;
 }
 
-function calcOverlaps(nd, dw) {
+function calcOverlaps(nd, dw, dispStart) {
   const groups=[];
   for (let i=0;i<nd;i++) {
-    const dStr=ds(add(pd(cfg.start),i));
+    const dStr=ds(add(pd(dispStart),i));
     const byCity={};
     for (const [,t] of Object.entries(trips)) {
       if(t.fra<=dStr&&t.til>=dStr) {
