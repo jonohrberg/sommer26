@@ -996,9 +996,12 @@ async function init() {
 
     if (!settings || !settings.start) {
       // Første gang — vis oppsettskjerm med default-datoer
-      const year = new Date().getFullYear();
-      document.getElementById('cfg-start').value = `${year}-06-12`;
-      document.getElementById('cfg-end').value   = `${year}-07-12`;
+      const _now = new Date();
+      const _start = new Date(_now); _start.setDate(_start.getDate() + 1);
+      const _end   = new Date(_now); _end.setDate(_end.getDate() + 90);
+      const _fmt = d => d.toISOString().slice(0,10);
+      document.getElementById('cfg-start').value = _fmt(_start);
+      document.getElementById('cfg-end').value   = _fmt(_end);
       const ss = document.getElementById('setup-screen');
       ss.classList.remove('hidden');
       ss.style.display = 'flex';
@@ -1296,7 +1299,7 @@ function openAdd(personKey) {
   document.getElementById('f-city').value='';
   document.getElementById('f-notes').value='';
   const td=today();
-  const def = td>=cfg.start&&td<=cfg.end ? td : cfg.start;
+  const def = td;
   document.getElementById('f-fra').value=def;
   document.getElementById('f-til').value=def;
   if(personKey) document.getElementById('f-person').value=personKey;
