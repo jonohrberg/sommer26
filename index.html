@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>☀️ Sommer 2026</title>
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Sommer 26">
+  <link rel="manifest" id="manifest-link">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d0d1a;
+      --surface: #16162a;
+      --card:    #1e1e38;
+      --border:  #2a2a4a;
+      --text:    #e2e8f0;
+      --muted:   #7c87a0;
+      --primary: #6366f1;
+      --r: 10px;
+      --name-w: 108px;
+      --row-h:  50px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg); color: var(--text);
+      height: 100dvh; overflow: hidden;
+      display: flex; flex-direction: column;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── LOADING ── */
+    #loading {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100dvh; gap: 16px; color: var(--muted);
+    }
+    .spin {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border); border-top-color: var(--primary);
+      border-radius: 50%; animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ERROR ── */
+    #error-screen {
+      display: none; flex-direction: column;
+      align-items: center; justify-content: center;
+      height: 100dvh; gap: 14px; padding: 30px; text-align: center;
+    }
+    #error-screen.show { display: flex; }
+    #error-screen h2 { font-size: 1.1rem; }
+    #error-screen p { color: var(--muted); font-size: 0.85rem; max-width: 320px; line-height: 1.55; }
+
+    /* ── APP ── */
+    #app {
+      display: none; flex-direction: column; height: 100%;
+    }
+    #app.show { display: flex; }
+
+    /* ── HEADER ── */
+    header {
+      flex-shrink: 0; display: flex; align-items: center;
+      padding: 0 14px; gap: 10px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      height: 52px;
+    }
+    .h-title { flex: 1; }
+    .h-title h1 { font-size: 1rem; font-weight: 700; }
+    .h-title p  { font-size: 0.74rem; color: var(--muted); }
+
+    .sync-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #10b981; transition: background 0.4s;
+    }
+    .sync-dot.syncing { background: var(--primary); animation: pulse .8s infinite; }
+    .sync-dot.error   { background: #ef4444; animation: none; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+    .icon-btn {
+      width: 34px; height: 34px; border-radius: 50%; border: none;
+      background: var(--card); color: var(--text); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem; transition: background 0.15s;
+    }
+    .icon-btn:hover { background: var(--border); }
+
+    /* ── LEGEND ── */
+    .legend {
+      flex-shrink: 0; display: flex; gap: 10px; padding: 7px 14px;
+      flex-wrap: wrap; background: var(--surface);
+      border-bottom: 1px solid var(--border); overflow-x: auto;
+    }
+    .l-item {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 0.74rem; color: var(--muted); cursor: pointer;
+      white-space: nowrap; padding: 2px 0;
+    }
+    .l-item:hover { color: var(--text); }
+    .l-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── TIMELINE ── */
+    .tl-wrap { flex: 1; overflow: auto; }
+    .tl-inner { min-width: max-content; display: flex; flex-direction: column; }
+
+    .tl-head {
+      display: flex; position: sticky; top: 0; z-index: 10;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .tl-head-name {
+      width: var(--name-w); min-width: var(--name-w); flex-shrink: 0;
+      position: sticky; left: 0; z-index: 20;
+      background: var(--surface); border-right: 1px solid var(--border);
+    }
+    .tl-dates { position: relative; flex-shrink: 0; height: 40px; }
+
+    .mo-lbl {
+      position: absolute; top: 3px; font-size: 0.67rem; font-weight: 700;
+      color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em;
+      padding-left: 4px; pointer-events: none;
+    }
+    .day-tick { position: absolute; bottom: 0; display: flex; flex-direction: column; align-items: center; }
+    .day-n {
+      font-size: 0.66rem; color: var(--muted); padding-bottom: 3px;
+      width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+    }
+    .day-tick.today .day-n { background: var(--primary); color: #fff; border-radius: 50%; font-weight: 700; }
+    .day-tick.wknd  .day-n { color: #a5b4fc; }
+
+    .tl-row { display: flex; border-bottom: 1px solid var(--border); min-height: var(--row-h); }
+    .tl-pname {
+      width: var(--name-w); min-width: var(--name-w); flex-shrink: 0;
+      position: sticky; left: 0; z-index: 5;
+      background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; align-items: center; gap: 8px; padding: 0 10px;
+    }
+    .p-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .p-lbl { font-size: 0.82rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .tl-trips { position: relative; flex-shrink: 0; }
+
+    .trip {
+      position: absolute; top: 6px; height: calc(var(--row-h) - 12px);
+      border-radius: 7px; display: flex; align-items: center; padding: 0 7px;
+      cursor: pointer; overflow: hidden; user-select: none;
+      border: 1px solid rgba(255,255,255,0.1);
+      transition: filter .12s, box-shadow .12s;
+    }
+    .trip:hover { filter: brightness(1.2); box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+    .trip-ico { font-size: 0.82rem; margin-right: 4px; flex-shrink: 0; }
+    .trip-txt { font-size: 0.74rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: rgba(255,255,255,0.93); }
+
+    .wknd-bg  { position: absolute; top: 0; bottom: 0; background: rgba(255,255,255,0.022); pointer-events: none; }
+    .today-ln {
+      position: absolute; top: 0; bottom: 0; width: 2px;
+      background: var(--primary); pointer-events: none; z-index: 3;
+    }
+    .today-ln::before {
+      content: ''; position: absolute; top: -3px; left: -4px;
+      width: 10px; height: 10px; border-radius: 50%; background: var(--primary);
+    }
+
+    .add-zone { position: absolute; inset: 0; cursor: pointer; z-index: 1; }
+    .add-zone:hover::after {
+      content: '+ Legg til'; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      font-size: 0.74rem; color: var(--muted);
+      background: var(--card); border: 1px dashed var(--border);
+      padding: 4px 10px; border-radius: 20px; white-space: nowrap;
+    }
+
+    .tl-ov-row { display: flex; border-bottom: 1px solid var(--border); min-height: 28px; }
+    .tl-ov-name {
+      width: var(--name-w); min-width: var(--name-w); flex-shrink: 0;
+      position: sticky; left: 0; z-index: 5;
+      background: var(--bg); border-right: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 10px;
+      font-size: 0.65rem; font-weight: 700; color: #a5b4fc;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .tl-ov-area { position: relative; flex-shrink: 0; }
+    .ov-blk {
+      position: absolute; top: 4px; height: 20px; border-radius: 4px;
+      background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.45);
+      display: flex; align-items: center; padding: 0 5px;
+      font-size: 0.63rem; color: #a5b4fc; font-weight: 700;
+      cursor: default; white-space: nowrap; overflow: hidden;
+    }
+
+    /* ── MODAL ── */
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+      z-index: 200; display: flex; align-items: flex-end; justify-content: center;
+      backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .overlay.on { opacity: 1; pointer-events: all; }
+    .modal {
+      background: var(--surface); border-radius: 14px 14px 0 0;
+      width: 100%; max-width: 480px; padding: 18px 20px;
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      transform: translateY(100%); transition: transform 0.28s cubic-bezier(.32,.72,0,1);
+      border-top: 1px solid var(--border); max-height: 90dvh; overflow-y: auto;
+    }
+    .overlay.on .modal { transform: translateY(0); }
+    .handle { width: 38px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 16px; }
+    .modal-title { font-size: 1rem; font-weight: 700; margin-bottom: 16px; }
+
+    label { display: block; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; }
+    input, select {
+      background: var(--bg); border: 1px solid var(--border); color: var(--text);
+      padding: 10px 12px; border-radius: 8px; font-size: 0.9rem; width: 100%;
+      font-family: inherit; transition: border-color 0.2s;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--primary); }
+
+    .form-row { display: flex; gap: 10px; }
+    .form-row .fg { flex: 1; }
+    .fg { margin-top: 12px; }
+    .fg:first-child { margin-top: 0; }
+
+    .t-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .t-opt {
+      padding: 8px 4px; border: 2px solid var(--border); border-radius: 8px;
+      background: none; color: var(--text); cursor: pointer; font-family: inherit;
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      font-size: 0.72rem; transition: all 0.15s;
+    }
+    .t-opt .i { font-size: 1.15rem; }
+    .t-opt.on { border-color: var(--primary); background: rgba(99,102,241,0.12); color: var(--primary); }
+
+    .btn {
+      padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer;
+      font-size: 0.9rem; font-weight: 600; transition: all .15s;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-p { background: var(--primary); color: #fff; }
+    .btn-p:hover { background: #4f46e5; }
+    .btn-g { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-g:hover { background: var(--card); color: var(--text); }
+    .btn-d { background: #ef4444; color: #fff; }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    .m-actions { display: flex; gap: 8px; margin-top: 16px; }
+    .m-actions .btn:last-child { flex: 1; }
+
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .share-row { display: flex; gap: 8px; margin-top: 6px; }
+    .share-row input { flex: 1; font-family: monospace; font-size: 0.76rem; }
+
+    /* ── POPUP ── */
+    .popup {
+      position: fixed; background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 13px 15px; z-index: 300;
+      min-width: 180px; max-width: 235px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+      animation: pop .15s ease;
+    }
+    @keyframes pop { from{opacity:0;transform:scale(.92)} to{opacity:1;transform:scale(1)} }
+    .popup h3 { font-size: 0.92rem; margin-bottom: 6px; }
+    .popup-meta { font-size: 0.78rem; color: var(--muted); margin-bottom: 3px; }
+    .popup-actions { display: flex; gap: 6px; margin-top: 10px; }
+
+    /* ── FAB ── */
+    .fab {
+      position: fixed; bottom: 22px; right: 20px;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: var(--primary); color: #fff; border: none;
+      font-size: 1.4rem; cursor: pointer; z-index: 100;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 18px rgba(99,102,241,0.55); transition: all .18s;
+    }
+    .fab:hover { transform: scale(1.08); }
+    .fab:active { transform: scale(0.93); }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 84px; left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); padding: 8px 18px; border-radius: 20px;
+      font-size: 0.83rem; z-index: 400; opacity: 0;
+      transition: all .22s; white-space: nowrap; pointer-events: none;
+    }
+    .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @media (min-width: 560px) {
+      .overlay { align-items: center; }
+      .modal { border-radius: 14px; margin: 16px; max-height: 86dvh; }
+      .t-grid { grid-template-columns: repeat(6, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <div class="spin"></div>
+  <span>Laster reisekalender…</span>
+</div>
+
+<!-- ERROR -->
+<div id="error-screen">
+  <div style="font-size:2.5rem">⚠️</div>
+  <h2>Klarte ikke koble til</h2>
+  <p id="error-msg">Sjekk at Vercel KV er koblet til prosjektet og at miljøvariablene er satt.</p>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <div class="h-title">
+      <h1>☀️ Sommer 2026</h1>
+      <p>12. juni – 20. juli</p>
+    </div>
+    <div class="sync-dot" id="sync-dot" title="Synkroniseringsstatus"></div>
+    <button class="icon-btn" onclick="openM('m-settings')">⚙️</button>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="tl-wrap" id="tl-wrap">
+    <div class="tl-inner" id="tl-inner"></div>
+  </div>
+
+  <button class="fab" onclick="openAdd()">+</button>
+</div>
+
+<!-- MODAL: TRIP -->
+<div class="overlay" id="m-trip" onclick="bgClose(event)">
+  <div class="modal">
+    <div class="handle"></div>
+    <div class="modal-title" id="trip-title">Legg til reise</div>
+
+    <div class="fg">
+      <label>Person</label>
+      <select id="f-person"></select>
+    </div>
+    <div class="fg">
+      <label>By / Sted</label>
+      <input id="f-city" type="text" placeholder="Oslo, Split, Dubrovnik…">
+    </div>
+    <div class="form-row" style="margin-top:12px">
+      <div class="fg"><label>Fra</label><input id="f-fra" type="date" min="2026-06-12" max="2026-07-20"></div>
+      <div class="fg"><label>Til</label><input id="f-til" type="date" min="2026-06-12" max="2026-07-20"></div>
+    </div>
+    <div class="fg">
+      <label>Transport dit</label>
+      <div class="t-grid" id="t-grid">
+        <button class="t-opt on" data-t="fly"   onclick="pickT(this)"><span class="i">✈️</span>Fly</button>
+        <button class="t-opt"    data-t="tog"   onclick="pickT(this)"><span class="i">🚂</span>Tog</button>
+        <button class="t-opt"    data-t="bil"   onclick="pickT(this)"><span class="i">🚗</span>Bil</button>
+        <button class="t-opt"    data-t="baat"  onclick="pickT(this)"><span class="i">⛴️</span>Båt</button>
+        <button class="t-opt"    data-t="buss"  onclick="pickT(this)"><span class="i">🚌</span>Buss</button>
+        <button class="t-opt"    data-t="annet" onclick="pickT(this)"><span class="i">📍</span>Annet</button>
+      </div>
+    </div>
+    <div class="m-actions">
+      <button class="btn btn-g" onclick="closeM('m-trip')">Avbryt</button>
+      <button id="del-btn" class="btn btn-d hidden" onclick="delTrip()">🗑</button>
+      <button class="btn btn-p" onclick="saveTrip()">Lagre</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: SETTINGS -->
+<div class="overlay" id="m-settings" onclick="bgClose(event)">
+  <div class="modal">
+    <div class="handle"></div>
+    <div class="modal-title">⚙️ Innstillinger</div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">
+      Del denne URL-en med venner – da er alle koblet til samme kalender.
+    </p>
+    <div class="share-row">
+      <input id="share-url" readonly>
+      <button class="btn btn-g btn-sm" onclick="copyURL()">Kopier</button>
+    </div>
+    <div class="divider"></div>
+    <p style="font-size:0.78rem;color:var(--muted)">Data synkroniseres via Vercel KV hvert 3. sekund.</p>
+    <div class="m-actions">
+      <button class="btn btn-p" style="width:100%;justify-content:center" onclick="closeM('m-settings')">Lukk</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP (dynamisk) -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── KONFIG ──────────────────────────────
+const TRIP_START = '2026-06-12';
+const TRIP_END   = '2026-07-20';
+
+const PEOPLE = [
+  { key: 'sanka',   name: 'Sanka',   color: '#6366f1' },
+  { key: 'ivo',     name: 'Ivo',     color: '#10b981' },
+  { key: 'sandra',  name: 'Sandra',  color: '#ec4899' },
+  { key: 'goran',   name: 'Goran',   color: '#f59e0b' },
+  { key: 'jon',     name: 'Jon',     color: '#3b82f6' },
+  { key: 'teo',     name: 'TEO',     color: '#a78bfa' },
+  { key: 'fredrik', name: 'Fredrik', color: '#f97316' },
+];
+
+const TRANSPORT = {
+  fly:   { i: '✈️' }, tog:  { i: '🚂' },
+  bil:   { i: '🚗' }, baat: { i: '⛴️' },
+  buss:  { i: '🚌' }, annet:{ i: '📍' },
+};
+
+// ── STATE ────────────────────────────────
+let trips     = {};
+let editId    = null;
+let transport = 'fly';
+let popup     = null;
+let lastHash  = '';
+let pollTimer = null;
+
+// ── UTILS ────────────────────────────────
+const ds    = d => d.toISOString().split('T')[0];
+const pd    = s => { const [y,m,d]=s.split('-').map(Number); return new Date(y,m-1,d); };
+const add   = (d,n) => { const r=new Date(d); r.setDate(r.getDate()+n); return r; };
+const gap   = (a,b) => Math.round((pd(b)-pd(a))/86400000);
+const today = () => ds(new Date());
+const uid   = () => Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+const esc   = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+// ── TOAST ────────────────────────────────
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('on');
+  setTimeout(() => el.classList.remove('on'), 2600);
+}
+
+// ── SYNC STATUS ──────────────────────────
+function syncDot(state) {
+  const d = document.getElementById('sync-dot');
+  d.className = 'sync-dot' + (state === 'syncing' ? ' syncing' : state === 'error' ? ' error' : '');
+}
+
+// ── API ──────────────────────────────────
+async function fetchTrips() {
+  syncDot('syncing');
+  try {
+    const res = await fetch('/api/trips');
+    if (!res.ok) throw new Error(res.status);
+    const data = await res.json();
+    const hash = JSON.stringify(data);
+    if (hash !== lastHash) { lastHash = hash; trips = data; render(); }
+    syncDot('ok');
+  } catch(e) {
+    syncDot('error');
+    console.warn('Sync feil:', e);
+  }
+}
+
+async function apiSave(id, trip) {
+  syncDot('syncing');
+  const res = await fetch('/api/trips', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id, trip }),
+  });
+  if (!res.ok) throw new Error('Lagring feilet');
+  syncDot('ok');
+}
+
+async function apiDelete(id) {
+  syncDot('syncing');
+  const res = await fetch(`/api/trips?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Sletting feilet');
+  syncDot('ok');
+}
+
+// ── START ────────────────────────────────
+async function init() {
+  try {
+    await fetchTrips();
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('app').classList.add('show');
+    buildUI();
+    pollTimer = setInterval(fetchTrips, 3000);
+  } catch(e) {
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('error-screen').classList.add('show');
+    document.getElementById('error-msg').textContent = e.message || 'Ukjent feil';
+  }
+}
+
+function buildUI() {
+  // Legend
+  const leg = document.getElementById('legend');
+  leg.innerHTML = PEOPLE.map(p =>
+    `<div class="l-item" onclick="openAdd('${p.key}')">
+      <div class="l-dot" style="background:${p.color}"></div>${p.name}
+    </div>`).join('');
+
+  // Person select
+  document.getElementById('f-person').innerHTML =
+    PEOPLE.map(p => `<option value="${p.key}">${p.name}</option>`).join('');
+
+  // Share URL
+  document.getElementById('share-url').value = location.href;
+}
+
+// ── RENDER ───────────────────────────────
+function render() {
+  const wrap = document.getElementById('tl-wrap');
+  const nameW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--name-w')) || 108;
+  const avail = wrap.clientWidth - nameW;
+  const nd = gap(TRIP_START, TRIP_END) + 1;  // 39 days
+  const dw = Math.max(10, Math.floor(avail / nd));
+  const W  = nd * dw;
+  const todayStr = today();
+  let html = '';
+
+  // Date header
+  html += `<div class="tl-head"><div class="tl-head-name"></div>
+    <div class="tl-dates" style="width:${W}px">`;
+  let lastMo = -1;
+  for (let i = 0; i < nd; i++) {
+    const d = add(pd(TRIP_START), i);
+    if (d.getMonth() !== lastMo) {
+      lastMo = d.getMonth();
+      html += `<div class="mo-lbl" style="left:${i*dw}px">${d.toLocaleDateString('no',{month:'short'})}</div>`;
+    }
+    const dStr = ds(d);
+    const isT = dStr === todayStr;
+    const isW = d.getDay()===0||d.getDay()===6;
+    if (dw>=13||d.getDate()===1||d.getDate()%5===0||isT) {
+      html += `<div class="day-tick${isT?' today':''}${isW?' wknd':''}" style="left:${i*dw}px;width:${dw}px">
+        <div class="day-n">${d.getDate()}</div></div>`;
+    }
+  }
+  html += `</div></div>`;
+
+  const todayOff = gap(TRIP_START, todayStr);
+
+  // Person rows
+  for (const p of PEOPLE) {
+    const myTrips = Object.entries(trips)
+      .filter(([,t])=>t.person===p.key)
+      .sort((a,b)=>a[1].fra.localeCompare(b[1].fra));
+
+    html += `<div class="tl-row">
+      <div class="tl-pname">
+        <div class="p-dot" style="background:${p.color}"></div>
+        <span class="p-lbl">${p.name}</span>
+      </div>
+      <div class="tl-trips" style="width:${W}px;height:var(--row-h)">`;
+
+    // Weekend shading
+    for (let i=0;i<nd;i++) {
+      const d=add(pd(TRIP_START),i);
+      if(d.getDay()===0||d.getDay()===6)
+        html+=`<div class="wknd-bg" style="left:${i*dw}px;width:${dw}px"></div>`;
+    }
+
+    // Today line
+    if (todayOff>=0&&todayOff<nd)
+      html+=`<div class="today-ln" style="left:${todayOff*dw+Math.floor(dw/2)}px"></div>`;
+
+    // Click zone when no trips
+    if (!myTrips.length)
+      html+=`<div class="add-zone" onclick="openAdd('${p.key}')"></div>`;
+
+    // Trips
+    for (const [tid,t] of myTrips) {
+      const s=gap(TRIP_START,t.fra), e=gap(TRIP_START,t.til);
+      const vs=Math.max(0,s), ve=Math.min(nd-1,e);
+      if(ve<0||vs>=nd) continue;
+      const left=(vs*dw), width=((ve-vs+1)*dw)-2;
+      const ico=(TRANSPORT[t.transport]||TRANSPORT.annet).i;
+      html+=`<div class="trip" style="left:${left}px;width:${width}px;background:${p.color}cc" onclick="showPopup(event,'${tid}')">`;
+      if(s>=0&&dw>=18) html+=`<span class="trip-ico">${ico}</span>`;
+      if(width>32) html+=`<span class="trip-txt">${esc(t.city)}</span>`;
+      html+=`</div>`;
+    }
+    html+=`</div></div>`;
+  }
+
+  // Overlap row
+  const ovs = calcOverlaps(nd, dw);
+  if (ovs.length) {
+    html+=`<div class="tl-ov-row">
+      <div class="tl-ov-name">⭐ Møtes</div>
+      <div class="tl-ov-area" style="width:${W}px;height:28px">`;
+    for (const g of ovs) {
+      const names=g.people.map(k=>PEOPLE.find(p=>p.key===k)?.name||k).join(' & ');
+      const short=names.length>20?names.slice(0,18)+'…':names;
+      html+=`<div class="ov-blk" style="left:${g.left}px;width:${g.w-2}px"
+        title="${esc(names)} i ${esc(g.city)}">⭐ ${esc(short)}</div>`;
+    }
+    html+=`</div></div>`;
+  }
+
+  document.getElementById('tl-inner').innerHTML = html;
+
+  // Auto-scroll to today
+  if (todayOff>0&&todayOff<nd) {
+    const s=document.getElementById('tl-wrap');
+    if(s.scrollLeft===0) s.scrollLeft=Math.max(0,(todayOff-3)*dw);
+  }
+}
+
+function calcOverlaps(nd, dw) {
+  const groups=[];
+  for (let i=0;i<nd;i++) {
+    const dStr=ds(add(pd(TRIP_START),i));
+    const byCity={};
+    for (const [,t] of Object.entries(trips)) {
+      if(t.fra<=dStr&&t.til>=dStr) {
+        const k=t.city.trim().toLowerCase();
+        if(!byCity[k]) byCity[k]={city:t.city, people:new Set()};
+        byCity[k].people.add(t.person);
+      }
+    }
+    for (const {city,people} of Object.values(byCity)) {
+      if(people.size<2) continue;
+      const gk=city.toLowerCase()+'|'+([ ...people].sort().join(','));
+      const last=groups[groups.length-1];
+      if(last&&last.gk===gk&&i===last._e+1) { last._e=i; last.w=(last._e-last._s+1)*dw; }
+      else groups.push({gk,city,people:[...people],_s:i,_e:i,left:i*dw,w:dw});
+    }
+  }
+  return groups;
+}
+
+// ── POPUP ────────────────────────────────
+function showPopup(e,tid) {
+  e.stopPropagation(); closePopup();
+  const t=trips[tid]; if(!t) return;
+  const p=PEOPLE.find(x=>x.key===t.person)||{};
+  const fmtD=s=>pd(s).toLocaleDateString('no',{day:'numeric',month:'short'});
+  const ico=(TRANSPORT[t.transport]||TRANSPORT.annet).i;
+  const el=document.createElement('div');
+  el.className='popup';
+  el.innerHTML=`
+    <h3>${ico} ${esc(t.city)}</h3>
+    <div class="popup-meta" style="color:${p.color||'var(--muted)'}">● ${esc(p.name||'?')}</div>
+    <div class="popup-meta">📅 ${fmtD(t.fra)} – ${fmtD(t.til)}</div>
+    <div class="popup-actions">
+      <button class="btn btn-g btn-sm" onclick="closePopup()">Lukk</button>
+      <button class="btn btn-p btn-sm" onclick="editTrip('${tid}');closePopup()">Rediger</button>
+    </div>`;
+  document.body.appendChild(el); popup=el;
+  const x=Math.min(e.clientX,innerWidth-245);
+  const y=Math.min(e.clientY+8,innerHeight-160);
+  el.style.left=x+'px'; el.style.top=y+'px';
+  setTimeout(()=>document.addEventListener('click',closePopup,{once:true}),80);
+}
+function closePopup(){if(popup){popup.remove();popup=null;}}
+
+// ── TRIP CRUD ────────────────────────────
+function openAdd(personKey) {
+  editId=null;
+  document.getElementById('trip-title').textContent='Legg til reise';
+  document.getElementById('del-btn').classList.add('hidden');
+  document.getElementById('f-city').value='';
+  const t=today();
+  document.getElementById('f-fra').value=t>=TRIP_START&&t<=TRIP_END?t:TRIP_START;
+  document.getElementById('f-til').value=t>=TRIP_START&&t<=TRIP_END?t:TRIP_START;
+  if(personKey) document.getElementById('f-person').value=personKey;
+  setT('fly'); openM('m-trip');
+}
+
+function editTrip(tid) {
+  const t=trips[tid]; if(!t) return;
+  editId=tid;
+  document.getElementById('trip-title').textContent='Rediger reise';
+  document.getElementById('del-btn').classList.remove('hidden');
+  document.getElementById('f-person').value=t.person;
+  document.getElementById('f-city').value=t.city;
+  document.getElementById('f-fra').value=t.fra;
+  document.getElementById('f-til').value=t.til;
+  setT(t.transport||'fly'); openM('m-trip');
+}
+
+async function saveTrip() {
+  const person=document.getElementById('f-person').value;
+  const city=document.getElementById('f-city').value.trim();
+  const fra=document.getElementById('f-fra').value;
+  const til=document.getElementById('f-til').value;
+  if(!city){toast('Skriv inn et sted');return;}
+  if(!fra||!til){toast('Velg datoer');return;}
+  if(til<fra){toast('Sluttdato kan ikke være før startdato');return;}
+  const id=editId||uid();
+  const trip={person,city,fra,til,transport};
+  trips[id]=trip; render(); // optimistisk
+  closeM('m-trip');
+  try { await apiSave(id,trip); toast(editId?'Oppdatert ✓':'Lagt til ✓'); }
+  catch(e){ toast('⚠️ '+e.message); }
+}
+
+async function delTrip() {
+  if(!editId||!confirm('Slett?')) return;
+  const id=editId;
+  delete trips[id]; render();
+  closeM('m-trip');
+  try { await apiDelete(id); toast('Slettet'); }
+  catch(e){ toast('⚠️ '+e.message); }
+}
+
+function pickT(btn){
+  document.querySelectorAll('.t-opt').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on'); transport=btn.dataset.t;
+}
+function setT(key){
+  transport=key;
+  document.querySelectorAll('.t-opt').forEach(b=>b.classList.toggle('on',b.dataset.t===key));
+}
+
+// ── SETTINGS ────────────────────────────
+function copyURL(){
+  navigator.clipboard.writeText(location.href)
+    .then(()=>toast('URL kopiert! 🔗'))
+    .catch(()=>toast('Kopier URL-en manuelt'));
+}
+
+// ── MODALS ───────────────────────────────
+function openM(id){ document.getElementById(id).classList.add('on'); }
+function closeM(id){ document.getElementById(id).classList.remove('on'); }
+function bgClose(e){ if(e.target.classList.contains('overlay')) e.target.classList.remove('on'); }
+
+// ── RESIZE ───────────────────────────────
+window.addEventListener('resize', render);
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){
+    closePopup();
+    document.querySelectorAll('.overlay.on').forEach(m=>m.classList.remove('on'));
+  }
+});
+
+// ── PWA ──────────────────────────────────
+const mf={name:'Sommer 2026',short_name:'Sommer26',start_url:'/',display:'standalone',
+  background_color:'#0d0d1a',theme_color:'#6366f1',
+  icons:[{src:`data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>`,sizes:'512x512',type:'image/svg+xml'}]};
+document.getElementById('manifest-link').href=URL.createObjectURL(new Blob([JSON.stringify(mf)],{type:'application/manifest+json'}));
+
+if('serviceWorker' in navigator){
+  const sw=`self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(clients.claim()));`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+}
+
+// ── START ────────────────────────────────
+init();
+</script>
+</body>
+</html>
