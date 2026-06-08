@@ -42,6 +42,47 @@
 
     .hidden { display: none !important; }
 
+    /* ── LANGUAGE SCREEN ── */
+    #lang-screen {
+      position: fixed; inset: 0; z-index: 1000;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 32px 24px; gap: 0;
+      background:
+        radial-gradient(ellipse at 50% -5%,  rgba(224,120,72,0.28) 0%, transparent 55%),
+        radial-gradient(ellipse at 15% 70%,  rgba(0,180,200,0.12)  0%, transparent 45%),
+        linear-gradient(180deg, #03111e 0%, #020c17 100%);
+    }
+    #lang-screen.hidden { display: none !important; }
+
+    .lang-logo { font-size: 3.2rem; margin-bottom: 14px; }
+    .lang-appname {
+      font-size: 1.5rem; font-weight: 800; text-align: center;
+      letter-spacing: -0.02em; margin-bottom: 6px;
+    }
+    .lang-tagline {
+      font-size: 0.85rem; color: var(--muted); text-align: center;
+      margin-bottom: 44px; line-height: 1.5;
+    }
+    .lang-cards {
+      display: flex; gap: 16px;
+    }
+    .lang-card {
+      width: 140px; padding: 28px 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 18px; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+      transition: all 0.2s; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      user-select: none;
+    }
+    .lang-card:hover {
+      border-color: var(--primary); background: var(--card);
+      transform: translateY(-4px); box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+    }
+    .lang-card:active { transform: translateY(-1px); }
+    .lang-flag { font-size: 3.2rem; line-height: 1; }
+    .lang-name { font-size: 0.92rem; font-weight: 700; color: var(--text); }
+
     /* ── LOADING ── */
     #loading {
       display: flex; flex-direction: column;
@@ -351,10 +392,27 @@
 </head>
 <body>
 
+<!-- LANGUAGE PICKER -->
+<div id="lang-screen">
+  <div class="lang-logo">🗓️</div>
+  <div class="lang-appname">The Markovic's Planner</div>
+  <div class="lang-tagline">Velg språk / Odaberite jezik</div>
+  <div class="lang-cards">
+    <div class="lang-card" onclick="setLang('no')">
+      <div class="lang-flag">🇳🇴</div>
+      <div class="lang-name">Norsk</div>
+    </div>
+    <div class="lang-card" onclick="setLang('hr')">
+      <div class="lang-flag">🇭🇷</div>
+      <div class="lang-name">Hrvatski</div>
+    </div>
+  </div>
+</div>
+
 <!-- LOADING -->
 <div id="loading">
   <div class="spin"></div>
-  <span>Laster The Markovic's Planner…</span>
+  <span id="loading-txt">Laster The Markovic's Planner…</span>
 </div>
 
 <!-- SETUP (første gang) -->
@@ -367,33 +425,34 @@
     linear-gradient(180deg, #03111e 0%, #020c17 100%);
 ">
   <div style="font-size:3rem;margin-bottom:10px">✈️</div>
-  <h1 style="font-size:1.4rem;margin-bottom:6px">Ny reisekalender</h1>
-  <p style="color:var(--muted);font-size:0.85rem;margin-bottom:28px;text-align:center">Sett opp turen, del lenken med vennene dine</p>
+  <h1 id="setup-title" style="font-size:1.4rem;margin-bottom:6px">Ny reisekalender</h1>
+  <p id="setup-sub" style="color:var(--muted);font-size:0.85rem;margin-bottom:28px;text-align:center">Sett opp turen, del lenken med vennene dine</p>
 
   <div style="width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;flex-direction:column;gap:14px;box-shadow:0 12px 40px rgba(0,0,0,0.5)">
     <div>
-      <label>Turnavn</label>
+      <label id="lbl-cfg-name">Turnavn</label>
       <input id="cfg-name" type="text" placeholder="Sommerferie 2026" style="margin-top:5px">
     </div>
     <div style="display:flex;gap:10px">
       <div style="flex:1">
-        <label>Fra dato</label>
+        <label id="lbl-cfg-start">Fra dato</label>
         <input id="cfg-start" type="date" style="margin-top:5px">
       </div>
       <div style="flex:1">
-        <label>Til dato</label>
+        <label id="lbl-cfg-end">Til dato</label>
         <input id="cfg-end" type="date" style="margin-top:5px">
       </div>
     </div>
-    <button class="btn btn-p" style="justify-content:center;margin-top:4px" onclick="saveSetup()">Start kalender →</button>
+    <button id="btn-setup-start" class="btn btn-p" style="justify-content:center;margin-top:4px" onclick="saveSetup()">Start kalender →</button>
   </div>
 </div>
 
 <!-- ERROR -->
 <div id="error-screen">
   <div style="font-size:2.5rem">⚠️</div>
-  <h2>Klarte ikke koble til</h2>
-  <p id="error-msg">Sjekk at Vercel KV er koblet til prosjektet og at miljøvariablene er satt.</p>
+  <h2 id="error-title">Klarte ikke koble til</h2>
+  <p id="error-base-msg">Sjekk at Vercel KV er koblet til prosjektet.</p>
+  <p id="error-msg" style="font-size:0.8rem;color:var(--muted);margin-top:8px"></p>
 </div>
 
 <!-- APP -->
@@ -423,32 +482,32 @@
     <div class="modal-title" id="trip-title">Legg til reise</div>
 
     <div class="fg">
-      <label>Person</label>
+      <label id="lbl-person">Person</label>
       <select id="f-person"></select>
     </div>
     <div class="fg">
-      <label>By / Sted</label>
+      <label id="lbl-city">By / Sted</label>
       <input id="f-city" type="text" placeholder="Oslo, Split, Dubrovnik…">
     </div>
     <div class="form-row" style="margin-top:12px">
-      <div class="fg"><label>Fra</label><input id="f-fra" type="date"></div>
-      <div class="fg"><label>Til</label><input id="f-til" type="date"></div>
+      <div class="fg"><label id="lbl-fra">Fra</label><input id="f-fra" type="date"></div>
+      <div class="fg"><label id="lbl-til">Til</label><input id="f-til" type="date"></div>
     </div>
     <div class="fg">
-      <label>Transport dit</label>
+      <label id="lbl-transport">Transport dit</label>
       <div class="t-grid" id="t-grid">
-        <button class="t-opt on" data-t="fly"   onclick="pickT(this)"><span class="i">✈️</span>Fly</button>
-        <button class="t-opt"    data-t="tog"   onclick="pickT(this)"><span class="i">🚂</span>Tog</button>
-        <button class="t-opt"    data-t="bil"   onclick="pickT(this)"><span class="i">🚗</span>Bil</button>
-        <button class="t-opt"    data-t="baat"  onclick="pickT(this)"><span class="i">⛴️</span>Båt</button>
-        <button class="t-opt"    data-t="buss"  onclick="pickT(this)"><span class="i">🚌</span>Buss</button>
-        <button class="t-opt"    data-t="annet" onclick="pickT(this)"><span class="i">📍</span>Annet</button>
+        <button class="t-opt on" data-t="fly"   onclick="pickT(this)"><span class="i">✈️</span><span id="t-fly">Fly</span></button>
+        <button class="t-opt"    data-t="tog"   onclick="pickT(this)"><span class="i">🚂</span><span id="t-tog">Tog</span></button>
+        <button class="t-opt"    data-t="bil"   onclick="pickT(this)"><span class="i">🚗</span><span id="t-bil">Bil</span></button>
+        <button class="t-opt"    data-t="baat"  onclick="pickT(this)"><span class="i">⛴️</span><span id="t-baat">Båt</span></button>
+        <button class="t-opt"    data-t="buss"  onclick="pickT(this)"><span class="i">🚌</span><span id="t-buss">Buss</span></button>
+        <button class="t-opt"    data-t="annet" onclick="pickT(this)"><span class="i">📍</span><span id="t-annet">Annet</span></button>
       </div>
     </div>
     <div class="m-actions">
-      <button class="btn btn-g" onclick="closeM('m-trip')">Avbryt</button>
+      <button id="btn-trip-cancel" class="btn btn-g" onclick="closeM('m-trip')">Avbryt</button>
       <button id="del-btn" class="btn btn-d hidden" onclick="delTrip()">🗑</button>
-      <button class="btn btn-p" onclick="saveTrip()">Lagre</button>
+      <button id="btn-trip-save" class="btn btn-p" onclick="saveTrip()">Lagre</button>
     </div>
   </div>
 </div>
@@ -457,35 +516,46 @@
 <div class="overlay" id="m-settings" onclick="bgClose(event)">
   <div class="modal">
     <div class="handle"></div>
-    <div class="modal-title">⚙️ Innstillinger</div>
+    <div id="settings-title" class="modal-title">⚙️ Innstillinger</div>
 
     <div>
-      <label>Turnavn</label>
+      <label id="lbl-s-name">Turnavn</label>
       <input id="s-name" type="text" placeholder="Sommerferie 2026" style="margin-top:5px">
     </div>
     <div style="display:flex;gap:10px;margin-top:12px">
       <div style="flex:1">
-        <label>Fra dato</label>
+        <label id="lbl-s-start">Fra dato</label>
         <input id="s-start" type="date" style="margin-top:5px">
       </div>
       <div style="flex:1">
-        <label>Til dato</label>
+        <label id="lbl-s-end">Til dato</label>
         <input id="s-end" type="date" style="margin-top:5px">
       </div>
     </div>
 
     <div class="divider"></div>
 
-    <label>Del kalender</label>
-    <p style="font-size:0.8rem;color:var(--muted);margin:4px 0 8px">Del denne URL-en med vennene dine.</p>
+    <label id="lbl-persons">Personer</label>
+    <div id="people-list" style="display:flex;flex-direction:column;gap:6px;margin:8px 0 10px"></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="new-person-name" type="text" placeholder="Navn" style="flex:1">
+      <input id="new-person-color" type="color" value="#6366f1"
+             style="width:40px;height:38px;padding:2px 3px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;flex-shrink:0">
+      <button class="btn btn-p btn-sm" style="flex-shrink:0" onclick="addPerson()">+</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <label id="lbl-share">Del kalender</label>
+    <p id="share-desc" style="font-size:0.8rem;color:var(--muted);margin:4px 0 8px">Del denne URL-en med vennene dine.</p>
     <div class="share-row">
       <input id="share-url" readonly>
       <button class="btn btn-g btn-sm" onclick="copyURL()">Kopier</button>
     </div>
 
     <div class="m-actions">
-      <button class="btn btn-g" onclick="closeM('m-settings')">Avbryt</button>
-      <button class="btn btn-p" onclick="saveSettings()">Lagre</button>
+      <button id="btn-settings-cancel" class="btn btn-g" onclick="closeM('m-settings')">Avbryt</button>
+      <button id="btn-settings-save" class="btn btn-p" onclick="saveSettings()">Lagre</button>
     </div>
   </div>
 </div>
@@ -502,21 +572,182 @@
   </div>
   <div class="install-actions">
     <button class="btn btn-p btn-sm" id="install-btn">Legg til</button>
-    <button class="btn btn-g btn-sm" onclick="dismissInstall()">Ikke nå</button>
+    <button id="install-dismiss" class="btn btn-g btn-sm" onclick="dismissInstall()">Ikke nå</button>
   </div>
 </div>
 
 <!-- iOS: pil som peker ned mot Share-knappen -->
 <div id="ios-arrow">
-  <div class="arrow-label">Trykk dele-ikonet nedst → «Legg til på hjem»</div>
+  <div id="ios-arrow-label" class="arrow-label">Trykk dele-ikonet nederst → «Legg til på hjem»</div>
   <div class="arrow-down"></div>
 </div>
 
 <script>
+// ── SPRÅK ────────────────────────────────
+let lang = localStorage.getItem('lang') || null;
+
+const STRINGS = {
+  no: {
+    loading:        "Laster The Markovic's Planner…",
+    setupTitle:     'Ny reisekalender',
+    setupSub:       'Sett opp turen, del lenken med vennene dine',
+    tripName:       'Turnavn',
+    tripNamePh:     'Sommerferie 2026',
+    startDate:      'Fra dato',
+    endDate:        'Til dato',
+    startBtn:       'Start kalender →',
+    person:         'Person',
+    city:           'By / Sted',
+    cityPh:         'Oslo, Split, Dubrovnik…',
+    transport:      'Transport dit',
+    fly:'Fly', train:'Tog', car:'Bil', boat:'Båt', bus:'Buss', other:'Annet',
+    addTrip:        'Legg til reise',
+    editTrip:       'Rediger reise',
+    from:           'Fra',
+    to:             'Til',
+    save:           'Lagre',
+    cancel:         'Avbryt',
+    close:          'Lukk',
+    settingsTitle:  '⚙️ Innstillinger',
+    shareLabel:     'Del kalender',
+    shareDesc:      'Del denne URL-en med vennene dine.',
+    overlap:        '⭐ Møtes',
+    installTitle:   'Legg til på hjemmeskjerm',
+    installDesc:    'Åpne som app — raskere og bedre!',
+    installBtn:     'Legg til',
+    installDismiss: 'Ikke nå',
+    iosInstallDesc: 'Trykk dele-ikonet (□↑) og velg «Legg til på hjem»',
+    iosInstallBtn:  'Vis meg',
+    iosArrow:       'Trykk dele-ikonet nederst → «Legg til på hjem»',
+    errorTitle:     'Klarte ikke koble til',
+    errorDesc:      'Sjekk at Vercel KV er koblet til prosjektet.',
+    toastUpdated:   'Oppdatert ✓',
+    toastAdded:     'Lagt til ✓',
+    toastDeleted:   'Slettet',
+    toastSaved:     'Innstillinger lagret ✓',
+    toastCopied:    'URL kopiert! 🔗',
+    toastCopyFail:  'Kopier URL-en manuelt',
+    toastCodeCopied:'Kode kopiert! 📋',
+    confirmDelete:  'Slett?',
+    persons:        'Personer',
+    addPerson:      'Legg til person',
+    personNamePh:   'Navn',
+    errPersonName:  'Skriv inn et navn',
+    errPersonExists:'Personen finnes allerede',
+    toastPersonAdded:  'Person lagt til ✓',
+    toastPersonRemoved:'Person fjernet',
+    confirmRemovePerson:'Fjerne personen? Reiser blir ikke slettet.',
+    errCity:        'Skriv inn et sted',
+    errDates:       'Velg datoer',
+    errDateOrder:   'Sluttdato kan ikke være før startdato',
+    errName:        'Skriv inn et turnavn',
+    edit:           'Rediger',
+  },
+  hr: {
+    loading:        "Učitavam The Markovic's Planner…",
+    setupTitle:     'Novi kalendar putovanja',
+    setupSub:       'Postavite putovanje, podijelite vezu s prijateljima',
+    tripName:       'Naziv putovanja',
+    tripNamePh:     'Ljetovanje 2026',
+    startDate:      'Od datuma',
+    endDate:        'Do datuma',
+    startBtn:       'Pokreni kalendar →',
+    person:         'Osoba',
+    city:           'Grad / Mjesto',
+    cityPh:         'Oslo, Split, Dubrovnik…',
+    transport:      'Prijevoz do',
+    fly:'Avion', train:'Vlak', car:'Auto', boat:'Brod', bus:'Bus', other:'Ostalo',
+    addTrip:        'Dodaj putovanje',
+    editTrip:       'Uredi putovanje',
+    from:           'Od',
+    to:             'Do',
+    save:           'Spremi',
+    cancel:         'Odustani',
+    close:          'Zatvori',
+    settingsTitle:  '⚙️ Postavke',
+    shareLabel:     'Dijeli kalendar',
+    shareDesc:      'Podijeli ovaj URL s prijateljima.',
+    overlap:        '⭐ Susret',
+    installTitle:   'Dodaj na početni zaslon',
+    installDesc:    'Otvori kao app — brže i bolje!',
+    installBtn:     'Dodaj',
+    installDismiss: 'Ne sada',
+    iosInstallDesc: 'Pritisni ikonu dijeljenja (□↑) i odaberi «Dodaj na početni»',
+    iosInstallBtn:  'Pokaži mi',
+    iosArrow:       'Pritisni ikonu dijeljenja → «Dodaj na početni»',
+    errorTitle:     'Nije moguće spojiti',
+    errorDesc:      'Provjeri da je Vercel KV povezan s projektom.',
+    toastUpdated:   'Ažurirano ✓',
+    toastAdded:     'Dodano ✓',
+    toastDeleted:   'Obrisano',
+    toastSaved:     'Postavke spremljene ✓',
+    toastCopied:    'URL kopiran! 🔗',
+    toastCopyFail:  'Kopiraj URL ručno',
+    toastCodeCopied:'Kod kopiran! 📋',
+    confirmDelete:  'Obriši?',
+    persons:        'Osobe',
+    addPerson:      'Dodaj osobu',
+    personNamePh:   'Ime',
+    errPersonName:  'Unesite ime',
+    errPersonExists:'Osoba već postoji',
+    toastPersonAdded:  'Osoba dodana ✓',
+    toastPersonRemoved:'Osoba uklonjena',
+    confirmRemovePerson:'Ukloniti osobu? Putovanja neće biti izbrisana.',
+    errCity:        'Unesite mjesto',
+    errDates:       'Odaberite datume',
+    errDateOrder:   'Krajnji datum ne može biti prije početnog',
+    errName:        'Unesite naziv putovanja',
+    edit:           'Uredi',
+  }
+};
+
+function t(key) {
+  return (STRINGS[lang] || STRINGS.no)[key] || key;
+}
+
+function applyLang() {
+  // Statiske HTML-elementer
+  document.getElementById('loading-txt').textContent         = t('loading');
+  document.getElementById('setup-title').textContent         = t('setupTitle');
+  document.getElementById('setup-sub').textContent           = t('setupSub');
+  document.getElementById('lbl-cfg-name').textContent        = t('tripName');
+  document.getElementById('cfg-name').placeholder            = t('tripNamePh');
+  document.getElementById('lbl-cfg-start').textContent       = t('startDate');
+  document.getElementById('lbl-cfg-end').textContent         = t('endDate');
+  document.getElementById('btn-setup-start').textContent     = t('startBtn');
+  document.getElementById('lbl-person').textContent          = t('person');
+  document.getElementById('lbl-city').textContent            = t('city');
+  document.getElementById('f-city').placeholder              = t('cityPh');
+  document.getElementById('lbl-fra').textContent             = t('from');
+  document.getElementById('lbl-til').textContent             = t('to');
+  document.getElementById('lbl-transport').textContent       = t('transport');
+  document.getElementById('t-fly').textContent               = t('fly');
+  document.getElementById('t-tog').textContent               = t('train');
+  document.getElementById('t-bil').textContent               = t('car');
+  document.getElementById('t-baat').textContent              = t('boat');
+  document.getElementById('t-buss').textContent              = t('bus');
+  document.getElementById('t-annet').textContent             = t('other');
+  document.getElementById('btn-trip-cancel').textContent     = t('cancel');
+  document.getElementById('btn-trip-save').textContent       = t('save');
+  document.getElementById('settings-title').textContent      = t('settingsTitle');
+  document.getElementById('lbl-s-name').textContent          = t('tripName');
+  document.getElementById('lbl-s-start').textContent         = t('startDate');
+  document.getElementById('lbl-s-end').textContent           = t('endDate');
+  document.getElementById('lbl-share').textContent           = t('shareLabel');
+  document.getElementById('share-desc').textContent          = t('shareDesc');
+  document.getElementById('btn-settings-cancel').textContent = t('cancel');
+  document.getElementById('btn-settings-save').textContent   = t('save');
+  document.getElementById('install-dismiss').textContent     = t('installDismiss');
+  document.getElementById('ios-arrow-label').textContent     = t('iosArrow');
+  document.getElementById('error-title').textContent         = t('errorTitle');
+  document.getElementById('error-base-msg').textContent      = t('errorDesc');
+  document.querySelector('html').lang = lang;
+}
+
 // ── KONFIG (lastes fra DB) ───────────────
 let cfg = { name: '', start: '', end: '' };
 
-const PEOPLE = [
+let PEOPLE = [
   { key: 'sanka',  name: 'Sanka',  color: '#6366f1' },
   { key: 'ivo',    name: 'Ivo',    color: '#10b981' },
   { key: 'sandra', name: 'Sandra', color: '#ec4899' },
@@ -582,25 +813,38 @@ async function apiSave(id, trip) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id, trip }),
   });
-  if (!res.ok) throw new Error('Lagring feilet');
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   syncDot('ok');
 }
 
 async function apiDelete(id) {
   syncDot('syncing');
   const res = await fetch(`/api/trips?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
-  if (!res.ok) throw new Error('Sletting feilet');
+  if (!res.ok) throw new Error('HTTP ' + res.status);
   syncDot('ok');
+}
+
+// ── SPRÅKVALG ────────────────────────────
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('lang', l);
+  document.getElementById('lang-screen').classList.add('hidden');
+  applyLang();
+  init();
 }
 
 // ── START ────────────────────────────────
 async function init() {
   try {
-    // Last innstillinger og turer parallelt
-    const [settings] = await Promise.all([
+    // Last innstillinger, personer og turer parallelt
+    const [settings, peopleData] = await Promise.all([
       fetch('/api/settings').then(r => r.json()),
+      fetch('/api/people').then(r => r.json()),
       fetchTrips(),
     ]);
+    if (peopleData && Array.isArray(peopleData) && peopleData.length > 0) {
+      PEOPLE = peopleData;
+    }
 
     document.getElementById('loading').classList.add('hidden');
 
@@ -627,9 +871,9 @@ async function saveSetup() {
   const name  = document.getElementById('cfg-name').value.trim();
   const start = document.getElementById('cfg-start').value;
   const end   = document.getElementById('cfg-end').value;
-  if (!name)         { toast('Skriv inn et turnavn'); return; }
-  if (!start || !end){ toast('Velg datoer'); return; }
-  if (end < start)   { toast('Sluttdato kan ikke være før startdato'); return; }
+  if (!name)         { toast(t('errName')); return; }
+  if (!start || !end){ toast(t('errDates')); return; }
+  if (end < start)   { toast(t('errDateOrder')); return; }
 
   await fetch('/api/settings', {
     method: 'POST',
@@ -677,7 +921,7 @@ function buildUI() {
 
 function fmtDate(s) {
   if (!s) return '';
-  return pd(s).toLocaleDateString('no', { day: 'numeric', month: 'short', year: 'numeric' });
+  return pd(s).toLocaleDateString(lang || 'no', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 // ── RENDER ───────────────────────────────
@@ -699,7 +943,7 @@ function render() {
     const d = add(pd(cfg.start), i);
     if (d.getMonth() !== lastMo) {
       lastMo = d.getMonth();
-      html += `<div class="mo-lbl" style="left:${i*dw}px">${d.toLocaleDateString('no',{month:'short'})}</div>`;
+      html += `<div class="mo-lbl" style="left:${i*dw}px">${d.toLocaleDateString(lang||'no',{month:'short'})}</div>`;
     }
     const dStr = ds(d);
     const isT = dStr === todayStr;
@@ -760,7 +1004,7 @@ function render() {
   const ovs = calcOverlaps(nd, dw);
   if (ovs.length) {
     html+=`<div class="tl-ov-row">
-      <div class="tl-ov-name">⭐ Møtes</div>
+      <div class="tl-ov-name">${t('overlap')}</div>
       <div class="tl-ov-area" style="width:${W}px;height:28px">`;
     for (const g of ovs) {
       const names=g.people.map(k=>PEOPLE.find(p=>p.key===k)?.name||k).join(' & ');
@@ -861,23 +1105,23 @@ async function saveTrip() {
   const city=document.getElementById('f-city').value.trim();
   const fra=document.getElementById('f-fra').value;
   const til=document.getElementById('f-til').value;
-  if(!city){toast('Skriv inn et sted');return;}
-  if(!fra||!til){toast('Velg datoer');return;}
-  if(til<fra){toast('Sluttdato kan ikke være før startdato');return;}
+  if(!city){toast(t('errCity'));return;}
+  if(!fra||!til){toast(t('errDates'));return;}
+  if(til<fra){toast(t('errDateOrder'));return;}
   const id=editId||uid();
   const trip={person,city,fra,til,transport};
   trips[id]=trip; render(); // optimistisk
   closeM('m-trip');
-  try { await apiSave(id,trip); toast(editId?'Oppdatert ✓':'Lagt til ✓'); }
+  try { await apiSave(id,trip); toast(editId?t('toastUpdated'):t('toastAdded')); }
   catch(e){ toast('⚠️ '+e.message); }
 }
 
 async function delTrip() {
-  if(!editId||!confirm('Slett?')) return;
+  if(!editId||!confirm(t('confirmDelete'))) return;
   const id=editId;
   delete trips[id]; render();
   closeM('m-trip');
-  try { await apiDelete(id); toast('Slettet'); }
+  try { await apiDelete(id); toast(t('toastDeleted')); }
   catch(e){ toast('⚠️ '+e.message); }
 }
 
@@ -895,9 +1139,9 @@ async function saveSettings() {
   const name  = document.getElementById('s-name').value.trim();
   const start = document.getElementById('s-start').value;
   const end   = document.getElementById('s-end').value;
-  if (!name)         { toast('Skriv inn et turnavn'); return; }
-  if (!start || !end){ toast('Velg datoer'); return; }
-  if (end < start)   { toast('Sluttdato kan ikke være før startdato'); return; }
+  if (!name)         { toast(t('errName')); return; }
+  if (!start || !end){ toast(t('errDates')); return; }
+  if (end < start)   { toast(t('errDateOrder')); return; }
 
   await fetch('/api/settings', {
     method: 'POST',
@@ -909,17 +1153,73 @@ async function saveSettings() {
   buildUI();
   render();
   closeM('m-settings');
-  toast('Innstillinger lagret ✓');
+  toast(t('toastSaved'));
 }
 
 function copyURL(){
   navigator.clipboard.writeText(location.href)
-    .then(()=>toast('URL kopiert! 🔗'))
-    .catch(()=>toast('Kopier URL-en manuelt'));
+    .then(()=>toast(t('toastCopied')))
+    .catch(()=>toast(t('toastCopyFail')));
+}
+
+// ── PEOPLE MANAGEMENT ───────────────────
+function renderPeopleList() {
+  const list = document.getElementById('people-list');
+  if (!list) return;
+  list.innerHTML = PEOPLE.map(p => `
+    <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--card);border-radius:8px;border:1px solid var(--border)">
+      <span style="width:14px;height:14px;border-radius:50%;background:${esc(p.color)};flex-shrink:0"></span>
+      <span style="flex:1;font-size:0.9rem">${esc(p.name)}</span>
+      <button onclick="removePerson('${esc(p.key)}')"
+              style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;padding:2px 4px"
+              title="Fjern">×</button>
+    </div>`).join('');
+  document.getElementById('new-person-name').placeholder = t('personNamePh');
+  document.getElementById('lbl-persons').textContent = t('persons');
+}
+
+async function savePeopleToAPI() {
+  await fetch('/api/people', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ people: PEOPLE }),
+  });
+}
+
+async function addPerson() {
+  const nameEl  = document.getElementById('new-person-name');
+  const colorEl = document.getElementById('new-person-color');
+  const name  = nameEl.value.trim();
+  const color = colorEl.value;
+  if (!name) { toast(t('errPersonName')); return; }
+  const key = name.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '') || ('p' + Date.now());
+  if (PEOPLE.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+    toast(t('errPersonExists')); return;
+  }
+  PEOPLE = [...PEOPLE, { key, name, color }];
+  nameEl.value = '';
+  colorEl.value = '#6366f1';
+  renderPeopleList();
+  buildUI();
+  await savePeopleToAPI();
+  toast(t('toastPersonAdded'));
+}
+
+async function removePerson(key) {
+  if (!confirm(t('confirmRemovePerson'))) return;
+  PEOPLE = PEOPLE.filter(p => p.key !== key);
+  renderPeopleList();
+  buildUI();
+  render();
+  await savePeopleToAPI();
+  toast(t('toastPersonRemoved'));
 }
 
 // ── MODALS ───────────────────────────────
-function openM(id){ document.getElementById(id).classList.add('on'); }
+function openM(id){
+  document.getElementById(id).classList.add('on');
+  if (id === 'm-settings') renderPeopleList();
+}
 function closeM(id){ document.getElementById(id).classList.remove('on'); }
 function bgClose(e){ if(e.target.classList.contains('overlay')) e.target.classList.remove('on'); }
 
@@ -973,9 +1273,9 @@ window.addEventListener('beforeinstallprompt', e => {
 if (isIOS && !isInstalled) {
   setTimeout(() => {
     showBanner();
-    document.getElementById('install-title').textContent = 'Legg til på hjemmeskjerm';
-    document.getElementById('install-desc').textContent  = 'Trykk dele-ikonet (□↑) nederst og velg «Legg til på hjem»';
-    document.getElementById('install-btn').textContent   = 'Vis meg';
+    document.getElementById('install-title').textContent = t('installTitle');
+    document.getElementById('install-desc').textContent  = t('iosInstallDesc');
+    document.getElementById('install-btn').textContent   = t('iosInstallBtn');
     document.getElementById('install-btn').onclick = () => {
       document.getElementById('ios-arrow').classList.add('show');
       setTimeout(() => document.getElementById('ios-arrow').classList.remove('show'), 4000);
@@ -984,7 +1284,12 @@ if (isIOS && !isInstalled) {
 }
 
 // ── START ────────────────────────────────
-init();
+if (lang) {
+  document.getElementById('lang-screen').classList.add('hidden');
+  applyLang();
+  init();
+}
+// else: lang-screen is visible by default; setLang() will call init()
 </script>
 </body>
 </html>
