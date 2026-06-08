@@ -905,7 +905,10 @@ async function init() {
     document.getElementById('loading').classList.add('hidden');
 
     if (!settings || !settings.start) {
-      // Første gang — vis oppsettskjerm
+      // Første gang — vis oppsettskjerm med default-datoer
+      const year = new Date().getFullYear();
+      document.getElementById('cfg-start').value = `${year}-06-12`;
+      document.getElementById('cfg-end').value   = `${year}-07-12`;
       const ss = document.getElementById('setup-screen');
       ss.classList.remove('hidden');
       ss.style.display = 'flex';
@@ -951,7 +954,7 @@ function startApp() {
 
 function buildUI() {
   // Oppdater tittel
-  document.getElementById('app-title').textContent = '✈️ ' + cfg.name;
+  document.getElementById('app-title').textContent = "🗓️ Kalenderplanlegging for The Markovics";
   document.getElementById('app-subtitle').textContent =
     fmtDate(cfg.start) + ' – ' + fmtDate(cfg.end);
 
