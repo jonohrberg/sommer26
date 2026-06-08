@@ -748,6 +748,8 @@ const STRINGS = {
     errDateOrder:   'Sluttdato kan ikke være før startdato',
     errName:        'Skriv inn et turnavn',
     edit:           'Rediger',
+    appTitle:       'The Markovics Holiday Planner',
+    appTitleShort:  'The Markovics',
     notes:          'Notater',
     notesPlaceholder: 'Flynummer, hvem kjører, annen info…',
     listView:       'Liste',
@@ -810,6 +812,8 @@ const STRINGS = {
     errDateOrder:   'Krajnji datum ne može biti prije početnog',
     errName:        'Unesite naziv putovanja',
     edit:           'Uredi',
+    appTitle:       'The Markovics Planer odmora',
+    appTitleShort:  'The Markovics',
     notes:          'Bilješke',
     notesPlaceholder: 'Broj leta, tko vozi, ostale informacije…',
     listView:       'Popis',
@@ -1040,7 +1044,7 @@ function startApp() {
 function buildUI() {
   // Oppdater tittel
   document.getElementById('app-title').textContent =
-    window.innerWidth < 400 ? "☀️ The Markovics" : "☀️ The Markovics Holiday Planner";
+    '☀️ ' + (window.innerWidth < 400 ? t('appTitleShort') : t('appTitle'));
   document.getElementById('app-subtitle').textContent =
     fmtDate(cfg.start) + ' – ' + fmtDate(cfg.end);
 
