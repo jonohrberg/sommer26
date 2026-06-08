@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>The Markovic's Planner</title>
-  <meta name="theme-color" content="#0d0d1a">
+  <meta name="theme-color" content="#120500">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Markovic's">
@@ -15,14 +15,14 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg:      #03111e;
-      --surface: #071e30;
-      --card:    #0c2840;
-      --border:  #153d5a;
-      --text:    #eef6fb;
-      --muted:   #5f9ab8;
-      --primary: #00b4c8;   /* Adriatisk turkis */
-      --warm:    #e07848;   /* Terrakotta/solnedgang */
+      --bg:      #120500;
+      --surface: #1e0d00;
+      --card:    #2b1500;
+      --border:  #4a2a08;
+      --text:    #fff4e6;
+      --muted:   #c4845a;
+      --primary: #ffb020;   /* Solgult */
+      --warm:    #ff5520;   /* Solnedgang rød */
       --r: 10px;
       --name-w: 108px;
       --row-h:  50px;
@@ -31,10 +31,11 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background:
-        radial-gradient(ellipse at 50% -5%,  rgba(224,120,72,0.22)  0%, transparent 50%),
-        radial-gradient(ellipse at 15% 60%,  rgba(0,180,200,0.10)   0%, transparent 45%),
-        radial-gradient(ellipse at 85% 100%, rgba(0,100,160,0.18)   0%, transparent 50%),
-        linear-gradient(180deg, #03111e 0%, #020c17 100%);
+        radial-gradient(ellipse at 50% -15%, rgba(255,190,0,0.50)   0%, transparent 55%),
+        radial-gradient(ellipse at 85% 20%,  rgba(255,80,10,0.28)   0%, transparent 45%),
+        radial-gradient(ellipse at 10% 70%,  rgba(255,140,0,0.18)   0%, transparent 45%),
+        radial-gradient(ellipse at 60% 100%, rgba(0,160,180,0.10)   0%, transparent 40%),
+        linear-gradient(180deg, #120500 0%, #0a0200 100%);
       color: var(--text);
       height: 100dvh; overflow: hidden;
       display: flex; flex-direction: column;
@@ -49,9 +50,10 @@
       align-items: center; justify-content: center;
       padding: 32px 24px; gap: 0;
       background:
-        radial-gradient(ellipse at 50% -5%,  rgba(224,120,72,0.28) 0%, transparent 55%),
-        radial-gradient(ellipse at 15% 70%,  rgba(0,180,200,0.12)  0%, transparent 45%),
-        linear-gradient(180deg, #03111e 0%, #020c17 100%);
+        radial-gradient(ellipse at 50% -15%, rgba(255,190,0,0.55)  0%, transparent 55%),
+        radial-gradient(ellipse at 85% 20%,  rgba(255,80,10,0.30)  0%, transparent 45%),
+        radial-gradient(ellipse at 10% 80%,  rgba(255,140,0,0.20)  0%, transparent 45%),
+        linear-gradient(180deg, #120500 0%, #0a0200 100%);
     }
     #lang-screen.hidden { display: none !important; }
 
@@ -420,9 +422,9 @@
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   height:100dvh; padding:24px;
   background:
-    radial-gradient(ellipse at 50% -5%,  rgba(224,120,72,0.25) 0%, transparent 55%),
-    radial-gradient(ellipse at 15% 60%,  rgba(0,180,200,0.12) 0%, transparent 45%),
-    linear-gradient(180deg, #03111e 0%, #020c17 100%);
+    radial-gradient(ellipse at 50% -15%, rgba(255,190,0,0.50)  0%, transparent 55%),
+    radial-gradient(ellipse at 85% 25%,  rgba(255,80,10,0.25)  0%, transparent 45%),
+    linear-gradient(180deg, #120500 0%, #0a0200 100%);
 ">
   <div style="font-size:3rem;margin-bottom:10px">✈️</div>
   <h1 id="setup-title" style="font-size:1.4rem;margin-bottom:6px">Ny reisekalender</h1>
@@ -463,6 +465,7 @@
       <p id="app-subtitle"></p>
     </div>
     <div class="sync-dot" id="sync-dot" title="Synkroniseringsstatus"></div>
+    <button class="icon-btn" id="lang-btn" onclick="showLangScreen()" title="Bytt språk">🇳🇴</button>
     <button class="icon-btn" onclick="openM('m-settings')">⚙️</button>
   </header>
 
@@ -742,6 +745,12 @@ function applyLang() {
   document.getElementById('error-title').textContent         = t('errorTitle');
   document.getElementById('error-base-msg').textContent      = t('errorDesc');
   document.querySelector('html').lang = lang;
+  const lb = document.getElementById('lang-btn');
+  if (lb) lb.textContent = lang === 'hr' ? '🇭🇷' : '🇳🇴';
+}
+
+function showLangScreen() {
+  document.getElementById('lang-screen').classList.remove('hidden');
 }
 
 // ── KONFIG (lastes fra DB) ───────────────
@@ -830,7 +839,13 @@ function setLang(l) {
   localStorage.setItem('lang', l);
   document.getElementById('lang-screen').classList.add('hidden');
   applyLang();
-  init();
+  // If app is already running, just re-render with new language
+  if (cfg.start) {
+    buildUI();
+    render();
+  } else {
+    init();
+  }
 }
 
 // ── START ────────────────────────────────
@@ -838,8 +853,8 @@ async function init() {
   try {
     // Last innstillinger, personer og turer parallelt
     const [settings, peopleData] = await Promise.all([
-      fetch('/api/settings').then(r => r.json()),
-      fetch('/api/people').then(r => r.json()),
+      fetch('/api/settings').then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch('/api/people').then(r => r.ok ? r.json() : null).catch(() => null),
       fetchTrips(),
     ]);
     if (peopleData && Array.isArray(peopleData) && peopleData.length > 0) {
