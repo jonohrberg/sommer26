@@ -271,7 +271,7 @@
 
     .add-zone { position: absolute; inset: 0; cursor: pointer; z-index: 1; }
     .add-zone:hover::after {
-      content: '+ Legg til'; position: absolute; top: 50%; left: 50%;
+      content: '+'; position: absolute; top: 50%; left: 50%;
       transform: translate(-50%,-50%);
       font-size: 0.74rem; color: var(--muted);
       background: var(--card); border: 1px dashed var(--border);
@@ -343,8 +343,8 @@
       font-size: 0.9rem; font-weight: 600; transition: all .15s;
       display: inline-flex; align-items: center; gap: 6px;
     }
-    .btn-p { background: var(--primary); color: #fff; }
-    .btn-p:hover { background: #4f46e5; }
+    .btn-p { background: var(--primary); color: #000; }
+    .btn-p:hover { background: #f5c400; }
     .btn-g { background: transparent; color: var(--muted); border: 1px solid var(--border); }
     .btn-g:hover { background: var(--card); color: var(--text); }
     .btn-d { background: #ef4444; color: #fff; }
@@ -389,7 +389,7 @@
       transform: translateX(-50%) translateY(8px);
       background: var(--card); border: 1px solid var(--border);
       color: var(--text); padding: 8px 18px; border-radius: 20px;
-      font-size: 0.83rem; z-index: 400; opacity: 0;
+      font-size: 0.83rem; z-index: 1100; opacity: 0;
       transition: all .22s; white-space: nowrap; pointer-events: none;
     }
     .toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -461,7 +461,7 @@
     }
     #ios-arrow.show { opacity: 1; }
     #ios-arrow .arrow-label {
-      background: var(--primary); color: #fff;
+      background: var(--primary); color: #000;
       padding: 6px 14px; border-radius: 20px;
       font-size: 0.8rem; font-weight: 600; white-space: nowrap;
     }
@@ -1250,20 +1250,20 @@ function calcOverlaps(nd, dw) {
 // ── POPUP ────────────────────────────────
 function showPopup(e,tid) {
   e.stopPropagation(); closePopup();
-  const t=trips[tid]; if(!t) return;
-  const p=PEOPLE.find(x=>x.key===t.person)||{};
-  const fmtD=s=>pd(s).toLocaleDateString('no',{day:'numeric',month:'short'});
-  const ico=(TRANSPORT[t.transport]||TRANSPORT.annet).i;
+  const tr=trips[tid]; if(!tr) return;
+  const p=PEOPLE.find(x=>x.key===tr.person)||{};
+  const fmtD=s=>pd(s).toLocaleDateString(lang||'no',{day:'numeric',month:'short'});
+  const ico=(TRANSPORT[tr.transport]||TRANSPORT.annet).i;
   const el=document.createElement('div');
   el.className='popup';
   el.innerHTML=`
-    <h3>${ico} ${esc(t.city)}</h3>
+    <h3>${ico} ${esc(tr.city)}</h3>
     <div class="popup-meta" style="color:${p.color||'var(--muted)'}">● ${esc(p.name||'?')}</div>
-    <div class="popup-meta">📅 ${fmtD(t.fra)} – ${fmtD(t.til)}</div>
-    ${t.notes?`<div class="popup-meta" style="color:var(--muted);font-style:italic">📝 ${esc(t.notes)}</div>`:''}
+    <div class="popup-meta">📅 ${fmtD(tr.fra)} – ${fmtD(tr.til)}</div>
+    ${tr.notes?`<div class="popup-meta" style="color:var(--muted);font-style:italic">📝 ${esc(tr.notes)}</div>`:''}
     <div class="popup-actions">
-      <button class="btn btn-g btn-sm" onclick="closePopup()">${lang==='hr'?'Zatvori':'Lukk'}</button>
-      <button class="btn btn-p btn-sm" onclick="editTrip('${tid}');closePopup()">${lang==='hr'?'Uredi':'Rediger'}</button>
+      <button class="btn btn-g btn-sm" onclick="closePopup()">${t('close')}</button>
+      <button class="btn btn-p btn-sm" onclick="editTrip('${tid}');closePopup()">${t('edit')}</button>
     </div>`;
   document.body.appendChild(el); popup=el;
   if (innerWidth < 500) {
@@ -1290,8 +1290,6 @@ function openAdd(personKey) {
   const def = td>=cfg.start&&td<=cfg.end ? td : cfg.start;
   document.getElementById('f-fra').value=def;
   document.getElementById('f-til').value=def;
-  document.getElementById('f-fra').min=cfg.start; document.getElementById('f-fra').max=cfg.end;
-  document.getElementById('f-til').min=cfg.start; document.getElementById('f-til').max=cfg.end;
   if(personKey) document.getElementById('f-person').value=personKey;
   setT('fly'); openM('m-trip');
 }
@@ -1305,8 +1303,6 @@ function editTrip(tid) {
   document.getElementById('f-city').value=tr.city;
   document.getElementById('f-fra').value=tr.fra;
   document.getElementById('f-til').value=tr.til;
-  document.getElementById('f-fra').min=cfg.start; document.getElementById('f-fra').max=cfg.end;
-  document.getElementById('f-til').min=cfg.start; document.getElementById('f-til').max=cfg.end;
   document.getElementById('f-notes').value=tr.notes||'';
   setT(tr.transport||'fly'); openM('m-trip');
 }
