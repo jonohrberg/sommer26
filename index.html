@@ -601,6 +601,7 @@
         <button class="t-opt"    data-t="baat"  onclick="pickT(this)"><span class="i">⛴️</span><span id="t-baat">Båt</span></button>
         <button class="t-opt"    data-t="buss"  onclick="pickT(this)"><span class="i">🚌</span><span id="t-buss">Buss</span></button>
         <button class="t-opt"    data-t="annet" onclick="pickT(this)"><span class="i">📍</span><span id="t-annet">Annet</span></button>
+        <button class="t-opt"    data-t="bopel" onclick="pickT(this)"><span class="i">🏠</span><span id="t-bopel">Bopel</span></button>
       </div>
     </div>
     <div class="fg">
@@ -708,7 +709,7 @@ const STRINGS = {
     city:           'By / Sted',
     cityPh:         'Oslo, Split, Dubrovnik…',
     transport:      'Transport dit',
-    fly:'Fly', train:'Tog', car:'Bil', boat:'Båt', bus:'Buss', other:'Annet',
+    fly:'Fly', train:'Tog', car:'Bil', boat:'Båt', bus:'Buss', other:'Annet', home:'Bopel',
     addTrip:        'Legg til reise',
     editTrip:       'Rediger reise',
     from:           'Fra',
@@ -772,7 +773,7 @@ const STRINGS = {
     city:           'Grad / Mjesto',
     cityPh:         'Oslo, Split, Dubrovnik…',
     transport:      'Prijevoz do',
-    fly:'Avion', train:'Vlak', car:'Auto', boat:'Brod', bus:'Bus', other:'Ostalo',
+    fly:'Avion', train:'Vlak', car:'Auto', boat:'Brod', bus:'Bus', other:'Ostalo', home:'Smještaj',
     addTrip:        'Dodaj putovanje',
     editTrip:       'Uredi putovanje',
     from:           'Od',
@@ -851,6 +852,7 @@ function applyLang() {
   document.getElementById('t-baat').textContent              = t('boat');
   document.getElementById('t-buss').textContent              = t('bus');
   document.getElementById('t-annet').textContent             = t('other');
+  document.getElementById('t-bopel').textContent             = t('home');
   document.getElementById('lbl-notes').textContent           = t('notes');
   document.getElementById('f-notes').placeholder             = t('notesPlaceholder');
   document.getElementById('btn-trip-cancel').textContent     = t('cancel');
@@ -894,6 +896,7 @@ const TRANSPORT = {
   fly:   { i: '✈️' }, tog:  { i: '🚂' },
   bil:   { i: '🚗' }, baat: { i: '⛴️' },
   buss:  { i: '🚌' }, annet:{ i: '📍' },
+  bopel: { i: '🏠' },
 };
 
 // ── STATE ────────────────────────────────
@@ -1119,18 +1122,37 @@ function render() {
 
   const todayOff = gap(dispStart, todayStr);
 
+  // Assign vertical lanes to avoid overlapping trips within a person's row
+  function assignLanes(sortedTrips) {
+    const laneEnds = []; // end date of last trip in each lane
+    const result = {};
+    for (const [tid, t] of sortedTrips) {
+      let placed = false;
+      for (let i = 0; i < laneEnds.length; i++) {
+        if (laneEnds[i] < t.fra) { laneEnds[i] = t.til; result[tid] = i; placed = true; break; }
+      }
+      if (!placed) { result[tid] = laneEnds.length; laneEnds.push(t.til); }
+    }
+    return { count: Math.max(1, laneEnds.length), map: result };
+  }
+
+  const laneH = 50; // matches --row-h
+
   // Person rows
   for (const p of PEOPLE) {
     const myTrips = Object.entries(trips)
       .filter(([,t])=>t.person===p.key)
       .sort((a,b)=>a[1].fra.localeCompare(b[1].fra));
 
-    html += `<div class="tl-row">
-      <div class="tl-pname">
+    const lanes = assignLanes(myTrips);
+    const rowH  = lanes.count * laneH;
+
+    html += `<div class="tl-row" style="min-height:${rowH}px">
+      <div class="tl-pname" style="min-height:${rowH}px">
         <div class="p-dot" style="background:${p.color}"></div>
         <span class="p-lbl">${p.name}</span>
       </div>
-      <div class="tl-trips" style="width:${W}px;height:var(--row-h)">`;
+      <div class="tl-trips" style="width:${W}px;height:${rowH}px">`;
 
     // Weekend shading
     for (let i=0;i<nd;i++) {
@@ -1152,8 +1174,10 @@ function render() {
       const vs=Math.max(0,s), ve=Math.min(nd-1,e);
       if(ve<0||vs>=nd) continue;
       const left=(vs*dw), width=((ve-vs+1)*dw)-2;
+      const lane = lanes.map[tid] ?? 0;
+      const top  = lane * laneH + 6;
       const ico=(TRANSPORT[t.transport]||TRANSPORT.annet).i;
-      html+=`<div class="trip" style="left:${left}px;width:${width}px;background:${p.color}cc" onclick="showPopup(event,'${tid}')">`;
+      html+=`<div class="trip" style="left:${left}px;width:${width}px;top:${top}px;height:${laneH-12}px;background:${p.color}" onclick="showPopup(event,'${tid}')">`;
       if(s>=0&&dw>=18) html+=`<span class="trip-ico">${ico}</span>`;
       if(width>32) html+=`<span class="trip-txt">${esc(t.city)}</span>`;
       html+=`</div>`;
